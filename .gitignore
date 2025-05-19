@@ -1,0 +1,7 @@
+# ignore Data
+
+.Data
+
+# ignore Outputs
+
+.Outputs
