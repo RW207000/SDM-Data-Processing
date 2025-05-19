@@ -5,3 +5,7 @@ Data/
 # ignore Outputs
 
 Outputs/
+
+# ignore Rproj
+
+.Rproj.user
