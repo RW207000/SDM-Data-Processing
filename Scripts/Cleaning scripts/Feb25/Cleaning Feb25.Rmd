@@ -108,7 +108,7 @@ freqcheck <- freqcheck[freqcheck$idvisitdate != c("Total", "<NA>"),]
 
 Let's start by cleaning medication data frame (units, typos, standardised doses)
 Create unique identifier of coid_assedate
-```{r: making medication_clean df}
+```{r : making medication_clean df}
 medication_clean <- medication
 
 medication_clean$coid_asse_id <- paste(medication_clean$CO.ID, medication_clean$Assessment.ID)
@@ -121,7 +121,11 @@ medication_clean <- left_join(medication_clean, assessment_dates, by = "Assessme
 medication_clean$Date.of.Assessment <- as.Date(medication_clean$Date.of.Assessment, format = "%d/%m/%Y")
 
 # formatting time
+medication_clean$Time <- ifelse(medication_clean$Time !=0, as.numeric(medication_clean$Time),NA)
 
+medication_clean$Time <- as.numeric(medication_clean$Time / 3600)
+
+medication_clean$Time <- round(medication_clean$Time, digits = 2)
 ```
 
 Now let's check what units have been used to see if we need to standardise any...
@@ -157,23 +161,44 @@ Firstly, I need to fix entries where the medication is 'other' and the note sect
 medication_clean$Medicine <- 
   ifelse(medication_clean$Note == "0fmody", (as.character("Efmody")), medication_clean$Medicine)
 
+medication_clean$Medicine <- 
+  ifelse(grepl("hydro", medication_clean$Note, ignore.case = TRUE), (as.character("IM Hydrocortisone")), medication_clean$Medicine)
+
 # HCe ratios
 prednisoloneratio <- 5
 dexamethasoneratio <- 80
 
 # add in HCe values
-medication_clean$HC_equivalent_dose <- NA
-medication_clean$HC_equivalent_dose <- as.character(medication_clean$HC_equivalent_dose)
+medication_clean$HCeq_dose <- NA
+medication_clean$HCeq_dose <- as.character(medication_clean$HCeq_dose)
 
-medication_clean$HC_equivalent_dose <- 
+medication_clean$HCeq_dose <- 
   ifelse(medication_clean$Medicine == "Hydrocortisone" | medication_clean$Medicine == "Efmody", medication_clean$Dose, NA)
 
-medication_clean$HC_equivalent_dose <- 
-  ifelse(medication_clean$Medicine == "Prednisolone", (as.numeric(medication_clean$Dose) * prednisoloneratio), medication_clean$HC_equivalent_dose)
+medication_clean$HCeq_dose <- 
+  ifelse(medication_clean$Medicine == "Prednisolone", (as.numeric(medication_clean$Dose) * prednisoloneratio), medication_clean$HCeq_dose)
 
-medication_clean$HC_equivalent_dose <- 
-  ifelse(medication_clean$Medicine == "Dexamethasone", (as.numeric(medication_clean$Dose) * dexamethasoneratio), medication_clean$HC_equivalent_dose)
+medication_clean$HCeq_dose <- 
+  ifelse(medication_clean$Medicine == "Dexamethasone", (as.numeric(medication_clean$Dose) * dexamethasoneratio), medication_clean$HCeq_dose)
 ```
+
+********* IGNORE IF NOT USING FEB25 DATA *********
+
+Looking at 'checkdailymedstats' there's an obvious error.
+- There's an entry of 'HC' with a dose of '100mg' which is way too high. Could be that the medicine should be IM HC or that the dose should be 10mg...
+- Based on the fact that the erroneous record (line 779 in medication_clean) represents the 4th dose for a patient, it's more likely that the medicine is wrong (it's common for the 4th dose to be IM HC) and that it should be IM HC instead of HC.
+
+Let's fix it!
+```{r}
+medication_clean$Medicine[779] = "IM Hydrocortisone"
+
+# need to re-run this bit to update corrected typo ^
+medication_clean$HCeq_dose <- 
+  ifelse(medication_clean$Medicine == "Hydrocortisone" | medication_clean$Medicine == "Efmody", medication_clean$Dose, NA)
+```
+
+*********
+
 
 To check that the modified values seem sensible, let's run some basic stats to check for outliers/abnormal values.
 I DON'T REALLY KNOW WHAT ARE SENSIBLE RANGES/VALUES...
@@ -181,37 +206,49 @@ I DON'T REALLY KNOW WHAT ARE SENSIBLE RANGES/VALUES...
 # Let's do it first using individual doses
 checkmedstats <- medication_clean %>%
   group_by(Medicine) %>%
-  summarise(mean_dose = mean(HC_equivalent_dose, na.rm = TRUE),
-            median_dose = median(HC_equivalent_dose, na.rm = TRUE),
-            sd_dose = sd(HC_equivalent_dose, na.rm = TRUE),
-            min_dose = min(HC_equivalent_dose, na.rm = TRUE),
-            max_dose = max(HC_equivalent_dose, na.rm = TRUE)) %>%
+  summarise(mean_dose = mean(HCeq_dose, na.rm = TRUE),
+            median_dose = median(HCeq_dose, na.rm = TRUE),
+            sd_dose = sd(HCeq_dose, na.rm = TRUE),
+            min_dose = min(HCeq_dose, na.rm = TRUE),
+            max_dose = max(HCeq_dose, na.rm = TRUE)) %>%
   mutate_if(is.numeric, ~round(., 2))
 
 # Now let's do it for total_daily_doses
+# calculate total daily HCeq doses per patient
 medperpatient <- medication_clean %>%
   group_by(Assessment.ID) %>%
-  summarise(total_standardised_daily_dose_1 = sum(HC_equivalent_dose, na.rm = TRUE))
+  summarise(total_daily_HCeq_dose = sum(HCeq_dose, na.rm = TRUE))
 
+# join ^ to medication_clean
 medication_clean <- full_join(medication_clean, medperpatient, by = "Assessment.ID")
 
 checkdailymedstats <- medication_clean %>%
   group_by(Medicine) %>%
-  summarise(mean_standardised_dose = mean(total_standardised_daily_dose_1, na.rm = TRUE),
-            median_standardised_dose = median(total_standardised_daily_dose_1, na.rm = TRUE),
-            sd_standardised_dose = sd(total_standardised_daily_dose_1, na.rm = TRUE),
-            min_standardised_dose = min(total_standardised_daily_dose_1, na.rm = TRUE),
-            max_standardised_dose = max(total_standardised_daily_dose_1, na.rm = TRUE)) %>%
+  summarise(mean_standardised_dose = mean(total_daily_HCeq_dose, na.rm = TRUE),
+            median_standardised_dose = median(total_daily_HCeq_dose, na.rm = TRUE),
+            sd_standardised_dose = sd(total_daily_HCeq_dose, na.rm = TRUE),
+            min_standardised_dose = min(total_daily_HCeq_dose, na.rm = TRUE),
+            max_standardised_dose = max(total_daily_HCeq_dose, na.rm = TRUE)) %>%
   mutate_if(is.numeric, ~round(., 2))
 ```
 
-```{r}
-medication_clean$Time <- ifelse(medication_clean$Time !=0, as.numeric(medication_clean$Time),NA)
 
-medication_clean$Time <- as.numeric(medication_clean$Time / 3600)
+```{r : isolating IM HC and 'other' meds}
+# isolate IM HC
+IM_HC <- subset(medication_clean, Medicine == "IM Hydrocortisone")
 
-medication_clean$Time <- round(medication_clean$Time, digits = 2)
+# isolate 'other' medicine
+othermeds <- subset(medication_clean, Medicine == "Other")
 ```
+
+Now you have a cleaned medication frame:
+  * units have been standardised
+  * basic checks for outliers have been done (checkmedstats and checkdailymedstats)
+  * Efmody and IM HC have both been correctly added into Medicine column (from note column)
+  * HCeq values have been added (pred *5, dex *40)
+  * Entries with 'IM HC' and 'Other' medicines have been isolated (othermeds)
+
+
 
 *********************************
 *********************************
@@ -306,6 +343,7 @@ totalmed_6th_entry <- totalmed_6th_entry %>%
          "Assessment.ID" = "Assessment.ID_6")
 ```
 
+
 ```{r : joining widened med frames together}
 meds_wide <- totalmed_1st_entry %>%
   left_join(totalmed_2nd_entry, by=c("CO.ID", "Assessment.ID")) %>%
@@ -315,10 +353,10 @@ meds_wide <- totalmed_1st_entry %>%
   left_join(totalmed_6th_entry, by=c("CO.ID", "Assessment.ID"))
 
 #add in 'total daily dose' from 'medperpatient' to meds_wide
-totaldailyformedswide <- select(medperpatient, c("Assessment.ID", "total_standardised_daily_dose_1"))
+totaldailyformedswide <- select(medperpatient, c("Assessment.ID", "total_daily_HCeq_dose"))
 
 meds_wide <- meds_wide %>%
-  left_join(select(medperpatient, Assessment.ID, total_standardised_daily_dose_1), by = "Assessment.ID")
+  left_join(select(medperpatient, Assessment.ID, total_daily_HCeq_dose), by = "Assessment.ID")
 
 meds_wide <- meds_wide %>%
   select_if(function(x) !all(is.na(x)))
@@ -327,6 +365,19 @@ meds_wide <- meds_wide %>%
 
 
 remove(totalmed_1st_entry, totalmed_2nd_entry, totalmed_3rd_entry, totalmed_4th_entry, totalmed_5th_entry, totalmed_6th_entry)
+
+# CHECK THIS!!!
+# drop unnecessary columns from meds_wide (e.g.: duplicated 'coid_asse_date')
+meds_wide <- meds_wide[-c(12, 19, 20, 22, 29, 30, 32, 37, 38, 39)]
+
+CARRY ON FROM HERE
+
+# # let's add in the number of doses per patient
+# meds_wide$number_of_doses <- medication_clean %>%
+#   group_by(Assessment.ID) %>%
+#   summarise("number of doses" = max(assessment_entry))
+# 
+# meds_wide <- meds_wide[-c(31)]
 ```
 Now we have a single line per visit and all doses in a single row.
 
@@ -340,7 +391,6 @@ patient_medicine <- select(meds_wide, c("Assessment.ID", "Medicine_1"))
 patient_w_h <- select(participantsnoduplicates, c("Assessment.ID", "Weight..kg.", "Height..cm."))
 absolute_med_values <- select(meds_wide, )
 
-
 medperpatient <- left_join(medperpatient, patient_medicine, by = "Assessment.ID")
 medperpatient <- left_join(medperpatient, patient_w_h, join_by("Assessment.ID" == "Assessment.ID"))
 
@@ -348,7 +398,7 @@ medperpatient <- left_join(medperpatient, patient_w_h, join_by("Assessment.ID" =
 ```
 
 *********************************
-
+*********************************
 ------Medication: making labs_wide ------
 
 ```{r : labs_wide, include=FALSE}
