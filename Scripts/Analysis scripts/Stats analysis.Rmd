@@ -1,0 +1,21 @@
+---
+title: "Stats analysis"
+author: "R.Welch"
+date: "2025-05-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*********************************
+*********************************
+------Script set up------
+
+```{r : reading libraries, include= FALSE}
+packages <- c("tidyverse", "readxl", "dplyr", "magrittr", "mixtools", "emmeans", "readr","data.table", "lubridate", "ggplot2", "magrittr", "skimr", "ggstatsplot","summarytools", "knitr", "here", "ggthemes", "ggthemes", "Amelia", "tidyr", "naniar", "stringr", "janitor", "readxl")
+
+lapply(packages, library, character.only = TRUE)
+```
+
