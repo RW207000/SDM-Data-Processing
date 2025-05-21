@@ -1,7 +1,11 @@
 # ignore Data
 
-.Data
+Data/
 
 # ignore Outputs
 
-.Outputs
+Outputs/
+
+# ignore Rproj
+
+.Rproj.user

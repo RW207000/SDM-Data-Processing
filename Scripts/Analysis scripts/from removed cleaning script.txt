@@ -1,0 +1,91 @@
+*********************************
+------Basic stats------
+
+```{r : sex distribution}
+sex_stats <- participantsnoduplicates %>%
+  group_by(Sex.at.birth) %>%
+  summarise(n = n())
+```
+
+```{r}
+visitsperparticipant <- participantsnoduplicates %>%
+  group_by(CO.ID) %>%
+  summarise(n = n())
+
+overallvisitsstats <- visitsperparticipant %>%
+  summarise("total number of patients" = n(),
+            "total number of visits" = sum(n),
+            meanvisits = mean(n, na.rm = TRUE),
+            medianvisits = median(n, na.rm = TRUE),                                            
+            sdvisits = sd(n, na.rm = TRUE),
+            minvisits = min(n, na.rm = TRUE),
+            maxvisits = max(n, na.rm = TRUE)) %>%
+  round(digits = 2)
+```
+
+```{r : patients per centre}
+centre_stats <-participantsnoduplicates %>%
+  group_by(Centre.ID) %>%
+  summarise("number of patients" = n_unique(CO.ID),
+            "number of visits" = n())
+```
+
+```{r : age}
+# N.B: if an age category is empty here (i.e. no one of that age) then it is omitted from this table
+# for adult data
+participantsnoduplicates$Age.category <- 
+  cut(participantsnoduplicates$Age,
+      breaks = c(0,10,20,30,40,50,60,70,80,90,100),
+      labels = c("0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100"))
+
+age_distribution <- participantsnoduplicates %>%
+  group_by(Age.category) %>%
+  summarise(n = n())
+
+age_stats <- participantsnoduplicates %>%
+  summarise("median age" = median(Age),
+            "minimum age" = min(Age),
+            "maximun age" = max(Age))
+
+# for pediatric data, all patients are <18 years old so the age categories for adult data isn't suitable - therefore, make a histogram instead.
+age_distribution <- ggplot(participantsnoduplicates, aes(x = Age)) + geom_histogram(fill = "purple") + theme_classic()
+```
+
+
+*********************************
+*********************************
+
+*********************************
+------Medication: stats ------
+
+Start with working out how many visits each participant had where medication data was recorded
+```{r : medication entries}
+medicationentries <- medication_clean %>%
+  group_by(Assessment.ID) %>%
+  summarise(n = n())
+```
+
+```{r : medication stats}
+overallvisitsstats$visitswithmed <- n_unique(meds_wide$Assessment.ID)
+
+overallvisitsstats$patientswithmed <- n_unique(meds_wide$CO.ID)
+
+# write.csv(overallvisitsstats, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/overallvisitsstats.csv", row.names = F)
+```
+
+```{r : prescriptions - medicines}
+medication_clean$prescribedmedperpatient <- paste(medication_clean$coid_asse_id, medication_clean$Medicine)
+  
+medprescriptions <- subset(medication_clean, assessment_entry == 1)
+
+all_prescriptions <- medprescriptions %>%
+  group_by(Medicine) %>%
+  summarise(n = n()) %>%
+  pivot_wider(names_from = Medicine,
+              values_from = n)
+
+othermeds <- subset(medication_clean, Medicine == "Other")
+```
+
+*********************************
+*********************************
