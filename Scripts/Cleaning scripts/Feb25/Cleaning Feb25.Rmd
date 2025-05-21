@@ -164,6 +164,17 @@ medication_clean$Medicine <-
 medication_clean$Medicine <- 
   ifelse(grepl("hydro", medication_clean$Note, ignore.case = TRUE), (as.character("IM Hydrocortisone")), medication_clean$Medicine)
 
+# ********* IGNORE IF NOT USING FEB25 DATA *********
+
+# Looking at 'checkdailymedstats' there's an obvious error.
+# - There's an entry of 'HC' with a dose of '100mg' which is way too high. Could be that the medicine should be IM HC or that the dose should be 10mg...
+# - Based on the fact that the erroneous record (line 779 in medication_clean) represents the 4th dose for a patient, it's more likely that the medicine is wrong (it's common for the 4th dose to be IM HC) and that it should be IM HC instead of HC.
+
+# Let's fix it!
+medication_clean$Medicine[779] = "IM Hydrocortisone"
+
+# ********* IGNORE IF NOT USING FEB25 DATA *********
+
 # HCe ratios
 prednisoloneratio <- 5
 dexamethasoneratio <- 80
@@ -181,23 +192,6 @@ medication_clean$HCeq_dose <-
 medication_clean$HCeq_dose <- 
   ifelse(medication_clean$Medicine == "Dexamethasone", (as.numeric(medication_clean$Dose) * dexamethasoneratio), medication_clean$HCeq_dose)
 ```
-
-********* IGNORE IF NOT USING FEB25 DATA *********
-
-Looking at 'checkdailymedstats' there's an obvious error.
-- There's an entry of 'HC' with a dose of '100mg' which is way too high. Could be that the medicine should be IM HC or that the dose should be 10mg...
-- Based on the fact that the erroneous record (line 779 in medication_clean) represents the 4th dose for a patient, it's more likely that the medicine is wrong (it's common for the 4th dose to be IM HC) and that it should be IM HC instead of HC.
-
-Let's fix it!
-```{r}
-medication_clean$Medicine[779] = "IM Hydrocortisone"
-
-# need to re-run this bit to update corrected typo ^
-medication_clean$HCeq_dose <- 
-  ifelse(medication_clean$Medicine == "Hydrocortisone" | medication_clean$Medicine == "Efmody", medication_clean$Dose, NA)
-```
-
-*********
 
 
 To check that the modified values seem sensible, let's run some basic stats to check for outliers/abnormal values.
@@ -343,7 +337,6 @@ totalmed_6th_entry <- totalmed_6th_entry %>%
          "Assessment.ID" = "Assessment.ID_6")
 ```
 
-
 ```{r : joining widened med frames together}
 meds_wide <- totalmed_1st_entry %>%
   left_join(totalmed_2nd_entry, by=c("CO.ID", "Assessment.ID")) %>%
@@ -361,45 +354,22 @@ meds_wide <- meds_wide %>%
 meds_wide <- meds_wide %>%
   select_if(function(x) !all(is.na(x)))
 
-# write.csv(meds_wide, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/meds_wide.csv", row.names = F)
-
+# let's add in the number of doses per patient
+meds_wide$`number of doses` <- medication_clean %>%
+  group_by(coid_asse_id) %>%
+  summarise("number of doses" = max(assessment_entry))
 
 remove(totalmed_1st_entry, totalmed_2nd_entry, totalmed_3rd_entry, totalmed_4th_entry, totalmed_5th_entry, totalmed_6th_entry)
 
-# CHECK THIS!!!
 # drop unnecessary columns from meds_wide (e.g.: duplicated 'coid_asse_date')
 meds_wide <- meds_wide[-c(12, 19, 20, 22, 29, 30, 32, 37, 38, 39)]
-
-CARRY ON FROM HERE
-
-# # let's add in the number of doses per patient
-# meds_wide$number_of_doses <- medication_clean %>%
-#   group_by(Assessment.ID) %>%
-#   summarise("number of doses" = max(assessment_entry))
-# 
-# meds_wide <- meds_wide[-c(31)]
 ```
 Now we have a single line per visit and all doses in a single row.
 
-Now to add in the number of doses onto 'medperpatient' (couldn't do this earlier because widening meds is what introduces assessment entry numbers)
-```{r : doses per patient}
-medperpatient$number_of_doses <- medication_clean %>%
-  group_by(Assessment.ID) %>%
-  summarise(max(assessment_entry))
-
-patient_medicine <- select(meds_wide, c("Assessment.ID", "Medicine_1"))
-patient_w_h <- select(participantsnoduplicates, c("Assessment.ID", "Weight..kg.", "Height..cm."))
-absolute_med_values <- select(meds_wide, )
-
-medperpatient <- left_join(medperpatient, patient_medicine, by = "Assessment.ID")
-medperpatient <- left_join(medperpatient, patient_w_h, join_by("Assessment.ID" == "Assessment.ID"))
-
-# write.csv(medperpatient, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/medperpatient.csv", row.names = F)
-```
 
 *********************************
 *********************************
-------Medication: making labs_wide ------
+------Biomarkers: making labs_wide ------
 
 ```{r : labs_wide, include=FALSE}
 valuesdrop <- c("Result", "Time")
@@ -422,10 +392,65 @@ names(labs_wide) <- gsub(x = names(labs_wide), pattern = ".y",
                         replacement = ".interpretation")
 ```
 
+Let's extract specific biomarkers of interest
+- 17OHP
+- andro
+- renin (convert to plasma renin activity by *0.158)
+- glucose
+
+```{r : labs biomarker subset}
+CAH_biomarkers <- select(labs_wide, c("Assessment.ID", "CO.ID", "Date", "17-OHP.value", "17-OHP.interpretation", "Androstenedione.value", "Androstenedione.interpretation", "Renin.value", "Renin.interpretation", "Total testosterone.value", "Total testosterone.interpretation", "Glucose.value", "Glucose.interpretation"))
+
+# 17-OHP
+CAH_biomarkers$`17-OHP.unit` <- str_extract(CAH_biomarkers$`17-OHP.value`, "[aA-zZ]+.?[aA-zZ]+.?[aA-zZ]*+")
+
+CAH_biomarkers$`17-OHP.value` <- as.numeric(str_extract(CAH_biomarkers$`17-OHP.value`, "[0-9]+.?[0-9]*+"))
+
+# androstenedione
+CAH_biomarkers$`Androstenedione.unit` <- str_extract(CAH_biomarkers$`Androstenedione.value`, "[aA-zZ]+.?[aA-zZ]+.?[aA-zZ]*+")
+
+CAH_biomarkers$`Androstenedione.value` <- as.numeric(str_extract(CAH_biomarkers$`Androstenedione.value`, "[0-9]+.?[0-9]*+"))
+
+# testosterone
+CAH_biomarkers$`Total.testosterone.unit` <- str_extract(CAH_biomarkers$`Total testosterone.value`, "[aA-zZ]+.?[aA-zZ]+.?[aA-zZ]*+")
+
+CAH_biomarkers$`Total testosterone.value` <- as.numeric(str_extract(CAH_biomarkers$`Total testosterone.value`, "[0-9]+.?[0-9]*+"))
+
+# renin
+CAH_biomarkers$`Renin.unit` <- str_extract(CAH_biomarkers$`Renin.value`, "[aA-zZ]+.?[aA-zZ]+.?[aA-zZ]*+")
+
+CAH_biomarkers$`Renin.value` <- as.numeric(str_extract(CAH_biomarkers$`Renin.value`, "[0-9]+.?[0-9]*+"))
+
+CAH_biomarkers$Renin.plasma.activity <- (CAH_biomarkers$Renin.value * 0.158)
+CAH_biomarkers$Renin.plasma.activity <- round(CAH_biomarkers$Renin.plasma.activity, digits = 2)
+
+# glucose
+CAH_biomarkers$Glucose.unit <- str_extract(CAH_biomarkers$Glucose.value, "[aA-zZ]+.?[aA-zZ]+.?[aA-zZ]*+")
+
+CAH_biomarkers$Glucose.value <- as.numeric(str_extract(CAH_biomarkers$Glucose.value, "[0-9]+.?[0-9]*+"))
+
+CAH_biomarkers_order <- c("Assessment.ID", "CO.ID", "Date", "17-OHP.value", "17-OHP.unit", "17-OHP.interpretation", "Androstenedione.value", "Androstenedione.unit", "Androstenedione.interpretation", "Renin.value", "Renin.unit", "Renin.interpretation", "Renin.plasma.activity", "Total testosterone.value", "Total.testosterone.unit", "Total testosterone.interpretation", "Glucose.value", "Glucose.interpretation")
+CAH_biomarkers <- CAH_biomarkers[, CAH_biomarkers_order]
+```
 
 
 
+```{r : write outputs}
 
+# participantsnoduplicates (for sex and age distributions)
+write.csv(participantsnoduplicates, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/participantsnoduplicatesFeb25.csv", row.names = F)
+
+# medication_clean
+write.csv(medication_clean, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/medication_cleanFeb25.csv", row.names = F)
+
+# meds_wide
+write.csv(meds_wide, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/meds_wideFeb25.csv", row.names = F)
+
+# labs_wide
+write.csv(labs_wide, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/labs_wideFeb25.csv", row.names = F)
+
+
+```
 
 
 ```{r : script completion message}
