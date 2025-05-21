@@ -436,21 +436,21 @@ CAH_biomarkers <- CAH_biomarkers[, CAH_biomarkers_order]
 
 
 ```{r : write outputs}
-
 # participantsnoduplicates (for sex and age distributions)
-write.csv(participantsnoduplicates, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/participantsnoduplicatesFeb25.csv", row.names = F)
+write.csv(participantsnoduplicates, file = "Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv", row.names = F)
 
 # medication_clean
-write.csv(medication_clean, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/medication_cleanFeb25.csv", row.names = F)
+write.csv(medication_clean, file = "Data/3 Cleaned data/Feb 25/medication_cleanFeb25.csv", row.names = F)
 
 # meds_wide
-write.csv(meds_wide, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/meds_wideFeb25.csv", row.names = F)
+write.csv(meds_wide, file = "Data/3 Cleaned data/Feb 25/meds_wideFeb25.csv", row.names = F)
 
 # labs_wide
-write.csv(labs_wide, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/labs_wideFeb25.csv", row.names = F)
-
+write.csv(labs_wide, file = "Data/3 Cleaned data/Feb 25/labs_wideFeb25.csv", row.names = F)
 
 ```
+
+
 
 
 ```{r : script completion message}
