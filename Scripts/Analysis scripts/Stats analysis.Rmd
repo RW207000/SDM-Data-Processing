@@ -20,46 +20,65 @@ lapply(packages, library, character.only = TRUE)
 ```
 
 ```{r : reading in data}
-participantsnoduplicates <- read.csv("Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv",header=T, na.strings="")
+participantsnoduplicates <- read.csv("Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv", header=T, na.strings="")
 participantsnoduplicates$Date.of.Assessment <- as.Date(participantsnoduplicates$Date.of.Assessment, format = "%d/%m/%Y")
+# ^ contains data entered into registry between 08/01/2019 and 07/02/2025
+
+## test
+core_data <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Core only 24.02.2025.csv", header = T, na.strings = c("", "NA"))
+# THIS IS THIS A RECORD OF EVERYONE IN THE REGISTRY - ONE LINE PER PERSON
+##
 
 medication_clean <- read.csv("Data/3 Cleaned data/Feb 25/medication_cleanFeb25.csv", header=T, na.strings= c("", "NA"))
 medication_clean <- remove_empty(medication_clean, c("cols"), cutoff = 1)
+
+meds_wide <- read.csv("Data/3 Cleaned data/Feb 25/meds_wideFeb25.csv", header = T, na.strings = c("", "NA"))
 
 labs_wide <- read.csv("Data/3 Cleaned data/Feb 25/labs_wideFeb25.csv", header=T, na.strings= c("", "NA"))
 labs_wide$Date <- as.Date(labs_wide$Date, format = "%d/%m/%Y")
 ```
 
 *********************************
+Make 'core_relevant' based on the CO.IDs present in the participants frame covering the time frame you're interested in.
+
+```{r}
+CO.IDs <- unique(participantsnoduplicates$CO.ID)
+
+core_relevant <- subset(core_data, CO.ID %in% CO.IDs)
+core_relevant$Date.of.Birth <- as.Date(core_relevant$Date.of.Birth, format = "%d/%m/%Y")
+```
+
+*********************************
 ------Basic stats------
+- USE CORE_RELEVANT FOR STATS HERE SO THAT EACH PATIENT COUNTS AS A SINGLE DATA POINT (not however many number of entries they have).
 - sex distribution
 - age distribution
 
-```{r : sex distribution}
-sex_stats <- participantsnoduplicates %>%
-  group_by(CO.ID, Sex.at.birth) %>%
+```{r : sex}
+sex_stats <- core_relevant %>%
+  group_by(Sex.at.birth) %>%
   summarise(n = n())
 ```
 
-```{r : age distribution}
-# N.B: if an age category is empty here (i.e. no one of that age) then it is omitted from this table
-# for adult data
-participantsnoduplicates$Age.category <- 
-  cut(participantsnoduplicates$Age,
+```{r : age}
+Today <- today()
+
+core_relevant$Age <- interval(core_relevant$Date.of.Birth, Today) / years(1)
+core_relevant$Age <- round(core_relevant$Age, digits = 1)
+
+core_relevant$Age_category <-
+    cut(core_relevant$Age,
       breaks = c(0,10,20,30,40,50,60,70,80,90,100),
       labels = c("0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100"))
 
-age_distribution <- participantsnoduplicates %>%
-  group_by(Age.category) %>%
+age_distribution <- core_relevant %>%
+  group_by(Age_category) %>%
   summarise(n = n())
 
-age_stats <- participantsnoduplicates %>%
+age_stats <- core_relevant %>%
   summarise("median age" = median(Age),
             "minimum age" = min(Age),
             "maximun age" = max(Age))
-
-# for pediatric data, all patients are <18 years old so the age categories for adult data isn't suitable - therefore, make a histogram instead.
-age_distribution_plot <- ggplot(participantsnoduplicates, aes(x = Age)) + geom_histogram(fill = "purple") + theme_classic()
 ```
 
 
@@ -77,7 +96,7 @@ centre_stats <-participantsnoduplicates %>%
             "number of visits" = n())
 ```
 
-```{r}
+```{r : visit stats}
 visitsperparticipant <- participantsnoduplicates %>%
   group_by(CO.ID) %>%
   summarise(n = n())
@@ -104,17 +123,20 @@ overallvisitsstats <- visitsperparticipant %>%
 
 Start with working out how many visits each participant had where medication data was recorded
 ```{r : medication entries}
-medicationentries <- medication_clean %>%
+medication_entries_per_patient <- medication_clean %>%
   group_by(Assessment.ID) %>%
   summarise(n = n())
 ```
 
 ```{r : medication stats}
-overallvisitsstats$visitswithmed <- n_unique(meds_wide$Assessment.ID)
-
 overallvisitsstats$patientswithmed <- n_unique(meds_wide$CO.ID)
 
-# write.csv(overallvisitsstats, file = "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/outputs/overallvisitsstats.csv", row.names = F)
+overallvisitsstats$visitswithmed <- n_unique(meds_wide$Assessment.ID)
+
+
+
+test <- meds_wide %>%
+  group_by(CO.ID)
 ```
 
 ```{r : prescriptions - medicines}
