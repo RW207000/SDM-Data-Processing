@@ -34,12 +34,10 @@ labs_wide$Date <- as.Date(labs_wide$Date, format = "%d/%m/%Y")
 ------Basic stats------
 - sex distribution
 - age distribution
-- 
-
 
 ```{r : sex distribution}
 sex_stats <- participantsnoduplicates %>%
-  group_by(Sex.at.birth) %>%
+  group_by(CO.ID, Sex.at.birth) %>%
   summarise(n = n())
 ```
 
@@ -61,13 +59,23 @@ age_stats <- participantsnoduplicates %>%
             "maximun age" = max(Age))
 
 # for pediatric data, all patients are <18 years old so the age categories for adult data isn't suitable - therefore, make a histogram instead.
-age_distribution <- ggplot(participantsnoduplicates, aes(x = Age)) + geom_histogram(fill = "purple") + theme_classic()
+age_distribution_plot <- ggplot(participantsnoduplicates, aes(x = Age)) + geom_histogram(fill = "purple") + theme_classic()
 ```
 
 
+*********************************
+------Visit stats------
+- patients per centre
+- visits per centre
+- number of medication entries
+- number of lab entries (?)
 
-
-
+```{r : patients and visits per centre}
+centre_stats <-participantsnoduplicates %>%
+  group_by(Centre.ID) %>%
+  summarise("number of patients" = n_unique(CO.ID),
+            "number of visits" = n())
+```
 
 ```{r}
 visitsperparticipant <- participantsnoduplicates %>%
@@ -83,13 +91,6 @@ overallvisitsstats <- visitsperparticipant %>%
             minvisits = min(n, na.rm = TRUE),
             maxvisits = max(n, na.rm = TRUE)) %>%
   round(digits = 2)
-```
-
-```{r : patients per centre}
-centre_stats <-participantsnoduplicates %>%
-  group_by(Centre.ID) %>%
-  summarise("number of patients" = n_unique(CO.ID),
-            "number of visits" = n())
 ```
 
 
