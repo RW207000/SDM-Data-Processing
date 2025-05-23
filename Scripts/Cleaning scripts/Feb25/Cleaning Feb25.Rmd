@@ -31,6 +31,15 @@ labs <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Labs data 24.02.2025.c
 labs$Date <- as.Date(labs$Date, format = "%d/%m/%Y")
 ```
 
+```{r : editing raw data frames}
+# add Centre IDs to medication and labs
+Centre.IDs <- select(participants, c("CO.ID", "Centre.ID"))
+
+Centre.IDs <- distinct(Centre.IDs, .keep_all = TRUE)
+
+medication <- left_join(medication, Centre.IDs, by = "CO.ID")
+```
+
 *********************************
 *********************************
 ------Removing duplicates------
@@ -355,14 +364,18 @@ meds_wide <- meds_wide %>%
   select_if(function(x) !all(is.na(x)))
 
 # let's add in the number of doses per patient
-meds_wide$`number of doses` <- medication_clean %>%
+doses_per_patient <- select(medication_clean, c("coid_asse_id", "assessment_entry"))
+
+doses_per_patient_2 <- doses_per_patient %>%
   group_by(coid_asse_id) %>%
   summarise("number of doses" = max(assessment_entry))
+
+meds_wide <- left_join(meds_wide, doses_per_patient_2, by = c("coid_asse_id_1" = "coid_asse_id"))
 
 remove(totalmed_1st_entry, totalmed_2nd_entry, totalmed_3rd_entry, totalmed_4th_entry, totalmed_5th_entry, totalmed_6th_entry)
 
 # drop unnecessary columns from meds_wide (e.g.: duplicated 'coid_asse_date')
-meds_wide <- meds_wide[-c(12, 19, 20, 22, 29, 30, 32, 37, 38, 39)]
+meds_wide <- meds_wide[-c(12, 19, 20, 22, 29, 30, 32, 37, 38)]
 ```
 Now we have a single line per visit and all doses in a single row.
 
@@ -433,8 +446,6 @@ CAH_biomarkers_order <- c("Assessment.ID", "CO.ID", "Date", "17-OHP.value", "17-
 CAH_biomarkers <- CAH_biomarkers[, CAH_biomarkers_order]
 ```
 
-
-
 ```{r : write outputs}
 # participantsnoduplicates (for sex and age distributions)
 write.csv(participantsnoduplicates, file = "Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv", row.names = F)
@@ -447,10 +458,12 @@ write.csv(meds_wide, file = "Data/3 Cleaned data/Feb 25/meds_wideFeb25.csv", row
 
 # labs_wide
 write.csv(labs_wide, file = "Data/3 Cleaned data/Feb 25/labs_wideFeb25.csv", row.names = F)
-
 ```
 
-
+```{r : adding Centre IDs to meds_wide and labs_wide}
+meds_wide <- left_join(meds_wide, Centre.IDs, by = "CO.ID")
+labs_wide <- left_join(labs_wide, Centre.IDs, by = "CO.ID")
+```
 
 
 ```{r : script completion message}
@@ -458,4 +471,3 @@ print("Script complete")
 ```
 
 
-blank
