@@ -21,8 +21,11 @@ lapply(packages, library, character.only = TRUE)
 
 
 ```{r : reading in data}
-participants <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Longitudinal data 24.02.2025.csv",header=T, na.strings="")
-participants$Date.of.Assessment <- as.Date(participants$Date.of.Assessment, format = "%d/%m/%Y")
+participants_all <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Longitudinal data 24.02.2025.csv",header=T, na.strings="")
+participants_all$Date.of.Assessment <- as.Date(participants_all$Date.of.Assessment, format = "%d/%m/%Y")
+
+# add in time frame
+participants <- participants_all[participants_all$Date.of.Assessment >= "2022-12-01",]
 
 medication <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Glucocorticoids Data 24.02.2025.csv", header=T, na.strings= c("", "NA"))
 medication <- remove_empty(medication, c("cols"), cutoff = 1)

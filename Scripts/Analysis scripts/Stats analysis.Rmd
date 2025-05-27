@@ -21,7 +21,7 @@ lapply(packages, library, character.only = TRUE)
 
 ```{r : reading in data}
 participantsnoduplicates <- read.csv("Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv", header=T, na.strings="")
-participantsnoduplicates$Date.of.Assessment <- as.Date(participantsnoduplicates$Date.of.Assessment, format = "%d/%m/%Y")
+# participantsnoduplicates$Date.of.Assessment <- as.Date(participantsnoduplicates$Date.of.Assessment, format = "%d/%m/%Y")
 # ^ contains data entered into registry between 08/01/2019 and 07/02/2025
 
 ## test
@@ -150,52 +150,59 @@ all_prescriptions <- medprescriptions %>%
 othermeds <- subset(medication_clean, Medicine == "Other")
 ```
 
+```{r}
+
+
+```
+
+
+
 ```{r : total daily dose trends per medication, per centre, include=FALSE}
 # will need to factor in whether patients are on single or combined therapies...
 # or do I? If doses are standardised then is this relevant?
 
 # let's make a new frame to determine which patients are on single or combined therapies:
-CARRY ON FROM HERE
+# CARRY ON FROM HERE
 
-meds_wide$`therapy type` <- "single or combined"
+# meds_wide$`therapy type` <- "single or combined"
 
-meds_wide$`therapy type` <-  
-    ifelse(!is.na(meds_wide$Medicine_1.x) &
-         (is.na(meds_wide$Medicine_2.x) & is.na(meds_wide$Medicine_3.x) & is.na(meds_wide$Medicine_4.x) |
-          meds_wide$Medicine_1.x == meds_wide$Medicine_2.x & is.na(meds_wide$Medicine_3.x) & is.na(meds_wide$Medicine_4.x) |
-          meds_wide$Medicine_1.x == meds_wide$Medicine_2.x & meds_wide$Medicine_1.x == meds_wide$Medicine_3.x & is.na(meds_wide$Medicine_4.x) |
-          meds_wide$Medicine_1.x == meds_wide$Medicine_2.x & meds_wide$Medicine_1.x == meds_wide$Medicine_3.x & meds_wide$Medicine_1.x == meds_wide$Medicine_4.x),
-          as.character("single"),
-          as.character("combined"))
+# meds_wide$`therapy type` <-  
+#     ifelse(!is.na(meds_wide$Medicine_1.x) &
+#          (is.na(meds_wide$Medicine_2.x) & is.na(meds_wide$Medicine_3.x) & is.na(meds_wide$Medicine_4.x) |
+#           meds_wide$Medicine_1.x == meds_wide$Medicine_2.x & is.na(meds_wide$Medicine_3.x) & is.na(meds_wide$Medicine_4.x) |
+#           meds_wide$Medicine_1.x == meds_wide$Medicine_2.x & meds_wide$Medicine_1.x == meds_wide$Medicine_3.x & is.na(meds_wide$Medicine_4.x) |
+#           meds_wide$Medicine_1.x == meds_wide$Medicine_2.x & meds_wide$Medicine_1.x == meds_wide$Medicine_3.x & meds_wide$Medicine_1.x == meds_wide$Medicine_4.x),
+#           as.character("single"),
+#           as.character("combined"))
 
-therapy_22_23 <- select(Nov22_Nov23_minimal_dataset, c("Centre.ID.x", "CO.ID.x", "Medicine_1.x", "Medicine_2.x", "Medicine_3.x", "Medicine_4.x"))
-therapy_23_25 <- select(Nov23_Feb25_minimal_dataset, c("Centre.ID.x", "CO.ID.x", "Medicine_1.x", "Medicine_2.x", "Medicine_3.x", "Medicine_4.x"))
-
-# remove rows with NO MEDICATION DATA
-therapy_22_23 <- therapy_22_23 [!is.na(therapy_22_23$Medicine_1.x),]
-therapy_23_25 <- therapy_23_25 [!is.na(therapy_23_25$Medicine_1.x),]
-
-therapy_22_23$"single/combined" <- NA
-therapy_23_25$"single/combined" <- NA
-
-# check for single
-therapy_22_23$`single/combined` <-
-  ifelse(!is.na(therapy_22_23$Medicine_1.x) &
-         (is.na(therapy_22_23$Medicine_2.x) & is.na(therapy_22_23$Medicine_3.x) & is.na(therapy_22_23$Medicine_4.x) |
-          therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_2.x & is.na(therapy_22_23$Medicine_3.x) & is.na(therapy_22_23$Medicine_4.x) |
-          therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_2.x & therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_3.x & is.na(therapy_22_23$Medicine_4.x) |
-          therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_2.x & therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_3.x & therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_4.x),
-          as.character("single"),
-          as.character("combined"))
-
-therapy_23_25$`single/combined` <-
-  ifelse(!is.na(therapy_23_25$Medicine_1.x) &
-         (is.na(therapy_23_25$Medicine_2.x) & is.na(therapy_23_25$Medicine_3.x) & is.na(therapy_23_25$Medicine_4.x) |
-          therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_2.x & is.na(therapy_23_25$Medicine_3.x) & is.na(therapy_23_25$Medicine_4.x) |
-          therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_2.x & therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_3.x & is.na(therapy_23_25$Medicine_4.x) |
-          therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_2.x & therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_3.x & therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_4.x),
-          as.character("single"),
-          as.character("combined"))
+# therapy_22_23 <- select(Nov22_Nov23_minimal_dataset, c("Centre.ID.x", "CO.ID.x", "Medicine_1.x", "Medicine_2.x", "Medicine_3.x", "Medicine_4.x"))
+# therapy_23_25 <- select(Nov23_Feb25_minimal_dataset, c("Centre.ID.x", "CO.ID.x", "Medicine_1.x", "Medicine_2.x", "Medicine_3.x", "Medicine_4.x"))
+# 
+# # remove rows with NO MEDICATION DATA
+# therapy_22_23 <- therapy_22_23 [!is.na(therapy_22_23$Medicine_1.x),]
+# therapy_23_25 <- therapy_23_25 [!is.na(therapy_23_25$Medicine_1.x),]
+# 
+# therapy_22_23$"single/combined" <- NA
+# therapy_23_25$"single/combined" <- NA
+# 
+# # check for single
+# therapy_22_23$`single/combined` <-
+#   ifelse(!is.na(therapy_22_23$Medicine_1.x) &
+#          (is.na(therapy_22_23$Medicine_2.x) & is.na(therapy_22_23$Medicine_3.x) & is.na(therapy_22_23$Medicine_4.x) |
+#           therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_2.x & is.na(therapy_22_23$Medicine_3.x) & is.na(therapy_22_23$Medicine_4.x) |
+#           therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_2.x & therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_3.x & is.na(therapy_22_23$Medicine_4.x) |
+#           therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_2.x & therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_3.x & therapy_22_23$Medicine_1.x == therapy_22_23$Medicine_4.x),
+#           as.character("single"),
+#           as.character("combined"))
+# 
+# therapy_23_25$`single/combined` <-
+#   ifelse(!is.na(therapy_23_25$Medicine_1.x) &
+#          (is.na(therapy_23_25$Medicine_2.x) & is.na(therapy_23_25$Medicine_3.x) & is.na(therapy_23_25$Medicine_4.x) |
+#           therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_2.x & is.na(therapy_23_25$Medicine_3.x) & is.na(therapy_23_25$Medicine_4.x) |
+#           therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_2.x & therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_3.x & is.na(therapy_23_25$Medicine_4.x) |
+#           therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_2.x & therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_3.x & therapy_23_25$Medicine_1.x == therapy_23_25$Medicine_4.x),
+#           as.character("single"),
+#           as.character("combined"))
 
 ```
 
