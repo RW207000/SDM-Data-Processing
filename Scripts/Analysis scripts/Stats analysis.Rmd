@@ -34,14 +34,15 @@ medication_clean <- remove_empty(medication_clean, c("cols"), cutoff = 1)
 
 meds_wide <- read.csv("Data/3 Cleaned data/Feb 25/meds_wideFeb25.csv", header = T, na.strings = c("", "NA"))
 
-labs_wide <- read.csv("Data/3 Cleaned data/Feb 25/labs_wideFeb25.csv", header=T, na.strings= c("", "NA"))
-labs_wide$Date <- as.Date(labs_wide$Date, format = "%d/%m/%Y")
+CAH_biomarkers <- read.csv("Data/3 Cleaned data/Feb 25/CAH_biomarkers.csv", header = T, na.strings = c("", "NA"))
+
+# N.B: using CAH biomarkers instead of labs_wide due to separation of numbers and unit chrs being present in CAH biomarkers and NOT in labs_wide.
 ```
 
 *********************************
 Make 'core_relevant' based on the CO.IDs present in the participants frame covering the time frame you're interested in.
 
-```{r}
+```{r : removing participant info for those out of time frame}
 CO.IDs <- unique(participantsnoduplicates$CO.ID)
 
 core_relevant <- subset(core_data, CO.ID %in% CO.IDs)
@@ -113,8 +114,6 @@ overallvisitsstats <- visitsperparticipant %>%
             maxvisits = max(n, na.rm = TRUE)) %>%
   round(digits = 2)
 ```
-
-
 
 
 *********************************

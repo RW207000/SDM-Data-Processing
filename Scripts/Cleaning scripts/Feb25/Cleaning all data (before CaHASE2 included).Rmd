@@ -25,7 +25,9 @@ participants_all <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Longitudin
 participants_all$Date.of.Assessment <- as.Date(participants_all$Date.of.Assessment, format = "%d/%m/%Y")
 
 # add in time frame
-participants <- participants_all[participants_all$Date.of.Assessment >= "2022-12-01",]
+participants <- participants_all
+
+# [participants_all$Date.of.Assessment >= "2022-12-01",]
 
 medication <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Glucocorticoids Data 24.02.2025.csv", header=T, na.strings= c("", "NA"))
 medication <- remove_empty(medication, c("cols"), cutoff = 1)
@@ -426,9 +428,9 @@ names(labs_wide) <- gsub(x = names(labs_wide), pattern = ".y",
 
 # make unique identifier in labs_wide
 labs_wide$coid_assedate <- paste(labs_wide$CO.ID, labs_wide$Date, sep = " ")
-labs_wide_outputs <- removeDuplicates(labs_wide)
-labs_wide <- labs_wide_outputs$noDupes
-labs_wide_dupes = labs_wide_outputs$dupes
+# labs_wide_outputs <- removeDuplicates(labs_wide)
+# labs_wide <- labs_wide_outputs$noDupes
+# labs_wide_dupes = labs_wide_outputs$dupes
 ```
 
 Let's extract specific biomarkers of interest
@@ -479,28 +481,28 @@ labs_wide <- left_join(labs_wide, Centre.IDs, by = "CO.ID")
 
 ```{r : write outputs}
 # participantsnoduplicates (for sex and age distributions)
-write.csv(participantsnoduplicates, file = "Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv", row.names = F, na = "")
+write.csv(participantsnoduplicates, file = "Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25_before_CaHASE2.csv", row.names = F, na = "")
 
 # medication_clean
-write.csv(medication_clean, file = "Data/3 Cleaned data/Feb 25/medication_cleanFeb25.csv", row.names = F, na = "")
+write.csv(medication_clean, file = "Data/3 Cleaned data/Feb 25/medication_cleanFeb25_before_CaHASE2.csv", row.names = F, na = "")
 
 # meds_wide
-write.csv(meds_wide, file = "Data/3 Cleaned data/Feb 25/meds_wideFeb25.csv", row.names = F, na = "")
+write.csv(meds_wide, file = "Data/3 Cleaned data/Feb 25/meds_wideFeb25_before_CaHASE2.csv", row.names = F, na = "")
 
 # CAH biomarkers
-CAH_biomarkers <- CAH_biomarkers[CAH_biomarkers$Date >= '2022-12-01',]
-write.csv(CAH_biomarkers, file = "Data/3 Cleaned data/Feb 25/CAH_biomarkers.csv", row.names = F, na = "")
+# CAH_biomarkers <- CAH_biomarkers[CAH_biomarkers$Date >= '2022-12-01',]
+write.csv(CAH_biomarkers, file = "Data/3 Cleaned data/Feb 25/CAH_biomarkers_before_CaHASE2.csv", row.names = F, na = "")
 
 # labs_wide
 labs_wide_export <- labs_wide
-labs_wide_export <- labs_wide_export[labs_wide_export$Date >= '2022-12-01',]
-write.csv(labs_wide_export, file = "Data/3 Cleaned data/Feb 25/labs_wideFeb25.csv", row.names = F, na = "")
+# labs_wide_export <- labs_wide_export[labs_wide_export$Date >= '2022-12-01',]
+write.csv(labs_wide_export, file = "Data/3 Cleaned data/Feb 25/labs_wideFeb25_before_CaHASE2.csv", row.names = F, na = "")
 ```
 
 ```{r : merge dataframes}
-
 all_data <- left_join(participantsnoduplicates, CAH_biomarkers, by = "Assessment.ID")
 all_data <- left_join(all_data, meds_wide, by = "Assessment.ID")
+
 
 freqDF <- as.data.frame(freq(all_data$Assessment.ID))
 freqDF_duplicates <- freqDF[freqDF$Freq >1,]
@@ -510,7 +512,7 @@ duplicated_assessments <- freqDF_duplicates$Assessment.ID
 all_data <- subset(all_data, !Assessment.ID %in% duplicated_assessments)
 
 # write csv of all_data
-write.csv(all_data, file = "Outputs/all_data.csv", row.names = F, na = "")
+write.csv(all_data, file = "Outputs/all_data_before_CaHASE2.csv", row.names = F, na = "")
 ```
 
 
