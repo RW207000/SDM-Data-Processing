@@ -30,8 +30,9 @@ participants <- participants_all[participants_all$Date.of.Assessment >= "2022-12
 medication <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Glucocorticoids Data 24.02.2025.csv", header=T, na.strings= c("", "NA"))
 medication <- remove_empty(medication, c("cols"), cutoff = 1)
 
-labs <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Labs data 24.02.2025.csv", header=T, na.strings= c("", "NA"))
-labs$Date <- as.Date(labs$Date, format = "%d/%m/%Y")
+labs_all <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Labs data 24.02.2025.csv", header=T, na.strings= c("", "NA"))
+labs_all$Date <- as.Date(labs_all$Date, format = "%d/%m/%Y")
+labs <- labs_all
 ```
 
 ```{r : editing raw data frames}
@@ -449,25 +450,30 @@ CAH_biomarkers_order <- c("Assessment.ID", "CO.ID", "Date", "17-OHP.value", "17-
 CAH_biomarkers <- CAH_biomarkers[, CAH_biomarkers_order]
 ```
 
-```{r : write outputs}
-# participantsnoduplicates (for sex and age distributions)
-write.csv(participantsnoduplicates, file = "Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv", row.names = F)
-
-# medication_clean
-write.csv(medication_clean, file = "Data/3 Cleaned data/Feb 25/medication_cleanFeb25.csv", row.names = F)
-
-# meds_wide
-write.csv(meds_wide, file = "Data/3 Cleaned data/Feb 25/meds_wideFeb25.csv", row.names = F)
-
-# labs_wide
-write.csv(labs_wide, file = "Data/3 Cleaned data/Feb 25/labs_wideFeb25.csv", row.names = F)
-```
-
 ```{r : adding Centre IDs to meds_wide and labs_wide}
 meds_wide <- left_join(meds_wide, Centre.IDs, by = "CO.ID")
 labs_wide <- left_join(labs_wide, Centre.IDs, by = "CO.ID")
 ```
 
+```{r : write outputs}
+# participantsnoduplicates (for sex and age distributions)
+write.csv(participantsnoduplicates, file = "Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv", row.names = F, na = "")
+
+# medication_clean
+write.csv(medication_clean, file = "Data/3 Cleaned data/Feb 25/medication_cleanFeb25.csv", row.names = F, na = "")
+
+# meds_wide
+write.csv(meds_wide, file = "Data/3 Cleaned data/Feb 25/meds_wideFeb25.csv", row.names = F, na = "")
+
+# CAH biomarkers
+CAH_biomarkers <- CAH_biomarkers[CAH_biomarkers$Date >= '2022-12-01',]
+write.csv(CAH_biomarkers, file = "Data/3 Cleaned data/Feb 25/CAH_biomarkers.csv", row.names = F, na = "")
+
+# labs_wide
+labs_wide_export <- labs_wide
+labs_wide_export <- labs_wide_export[labs_wide_export$Date >= '2022-12-01',]
+write.csv(labs_wide_export, file = "Data/3 Cleaned data/Feb 25/labs_wideFeb25.csv", row.names = F, na = "")
+```
 
 ```{r : script completion message}
 print("Script complete")
