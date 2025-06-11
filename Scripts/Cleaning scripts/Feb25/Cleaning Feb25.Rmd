@@ -58,7 +58,6 @@ SDS_height_bone_age <- select(SDS_height_bone_age, c("Assessment.ID", "AgeatBA",
 # merge SDS frames to participants
 participants <- left_join(participants, SDS_age_sex, by = "Assessment.ID")
 participants <- left_join(participants, SDS_height_bone_age, by = "Assessment.ID")
-
 ```
 
 *********************************
@@ -131,8 +130,7 @@ freqcheck <- freqcheck[freqcheck$idvisitdate != c("Total", "<NA>"),]
 
 
 *********************************
-
-
+*********************************
 
 ------Medication: cleaning ------
 
@@ -410,11 +408,25 @@ meds_wide <- left_join(meds_wide, doses_per_patient_2, by = c("coid_assedate_1" 
 remove(totalmed_1st_entry, totalmed_2nd_entry, totalmed_3rd_entry, totalmed_4th_entry, totalmed_5th_entry, totalmed_6th_entry)
 
 # drop unnecessary columns from meds_wide (e.g.: duplicated 'coid_asse_date')
-meds_wide <- meds_wide[-c(12, 19, 20, 22, 29, 30, 32, 37, 38)]
-
-
+# meds_wide <- meds_wide[-c(12, 19, 20, 22, 29, 30, 32, 37, 38)]
 ```
 Now we have a single line per visit and all doses in a single row.
+
+
+
+```{r : therapy types - single or combined}
+meds_wide$`therapy type` <- "single or combined"
+
+meds_wide$`therapy type` <-
+    ifelse(!is.na(meds_wide$Medicine_1) &
+         (is.na(meds_wide$Medicine_2) & is.na(meds_wide$Medicine_3) & is.na(meds_wide$Medicine_4) |
+          meds_wide$Medicine_1 == meds_wide$Medicine_2 & is.na(meds_wide$Medicine_3) & is.na(meds_wide$Medicine_4) |
+          meds_wide$Medicine_1 == meds_wide$Medicine_2 & meds_wide$Medicine_1 == meds_wide$Medicine_3 & is.na(meds_wide$Medicine_4) |
+          meds_wide$Medicine_1 == meds_wide$Medicine_2 & meds_wide$Medicine_1 == meds_wide$Medicine_3 & meds_wide$Medicine_1 == meds_wide$Medicine_4),
+          as.character("single"),
+          as.character("combined"))
+```
+
 
 
 *********************************
