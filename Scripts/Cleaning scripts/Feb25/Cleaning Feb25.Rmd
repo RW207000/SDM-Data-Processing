@@ -31,6 +31,10 @@ participants_all$Date.of.Assessment <- as.Date(participants_all$Date.of.Assessme
 participants <- participants_all
 #[participants_all$Date.of.Assessment >= "2022-12-01",]
 
+SDS_age_sex <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSforage&sex.csv", header=T, na.strings="")
+
+SDS_height_bone_age <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSheightforBA.csv", header=T, na.strings="")
+
 medication <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Glucocorticoids Data UK 07.04.25 shared with PI.csv", header=T, na.strings= c("", "NA"))
 medication <- remove_empty(medication, c("cols"), cutoff = 1)
 
@@ -46,6 +50,15 @@ Centre.IDs <- select(participants, c("CO.ID", "Centre.ID"))
 Centre.IDs <- distinct(Centre.IDs, .keep_all = TRUE)
 
 medication <- left_join(medication, Centre.IDs, by = "CO.ID")
+
+# remove repeated/un-necessary columns from SDS dataframes
+SDS_age_sex <- select(SDS_age_sex, c("Assessment.ID", "HeightSDS", "WeightSDS", "BMISDS"))
+SDS_height_bone_age <- select(SDS_height_bone_age, c("Assessment.ID", "AgeatBA", "BA", "HeighSDSforBA"))
+
+# merge SDS frames to participants
+participants <- left_join(participants, SDS_age_sex, by = "Assessment.ID")
+participants <- left_join(participants, SDS_height_bone_age, by = "Assessment.ID")
+
 ```
 
 *********************************
