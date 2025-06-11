@@ -53,11 +53,14 @@ medication <- left_join(medication, Centre.IDs, by = "CO.ID")
 
 # remove repeated/un-necessary columns from SDS dataframes
 SDS_age_sex <- select(SDS_age_sex, c("Assessment.ID", "HeightSDS", "WeightSDS", "BMISDS"))
-SDS_height_bone_age <- select(SDS_height_bone_age, c("Assessment.ID", "AgeatBA", "BA", "HeighSDSforBA"))
+SDS_height_bone_age <- select(SDS_height_bone_age, c("Assessment.ID", "AgeatBA", "BA", "HeightSDSforBA"))
 
 # merge SDS frames to participants
 participants <- left_join(participants, SDS_age_sex, by = "Assessment.ID")
 participants <- left_join(participants, SDS_height_bone_age, by = "Assessment.ID")
+
+# add in age category (<12 and >12)
+participants$`Age category` <- ifelse(participants$Age <12, as.character("under 12"), as.character("over 12"))
 ```
 
 *********************************
@@ -411,7 +414,6 @@ remove(totalmed_1st_entry, totalmed_2nd_entry, totalmed_3rd_entry, totalmed_4th_
 # meds_wide <- meds_wide[-c(12, 19, 20, 22, 29, 30, 32, 37, 38)]
 ```
 Now we have a single line per visit and all doses in a single row.
-
 
 
 ```{r : therapy types - single or combined}
