@@ -20,21 +20,21 @@ lapply(packages, library, character.only = TRUE)
 ```
 
 ```{r : reading in data}
-participantsnoduplicates <- read.csv("Data/3 Cleaned data/Feb 25/participantsnoduplicatesFeb25.csv", header=T, na.strings="")
+participantsnoduplicates <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/participantsnoduplicates.csv", header=T, na.strings="")
 # participantsnoduplicates$Date.of.Assessment <- as.Date(participantsnoduplicates$Date.of.Assessment, format = "%d/%m/%Y")
 # ^ contains data entered into registry between 08/01/2019 and 07/02/2025
 
-## test
-core_data <- read.csv("Data/1 Registry extracts/Feb 25 Extract/Core only 24.02.2025.csv", header = T, na.strings = c("", "NA"))
-# THIS IS THIS A RECORD OF EVERYONE IN THE REGISTRY - ONE LINE PER PERSON
-##
+# ## test
+core_data <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/participantsnoduplicates.csv", header = T, na.strings = c("", "NA"))
+# # THIS IS THIS A RECORD OF EVERYONE IN THE REGISTRY - ONE LINE PER PERSON
+# ##
 
-medication_clean <- read.csv("Data/3 Cleaned data/Feb 25/medication_cleanFeb25.csv", header=T, na.strings= c("", "NA"))
+medication_clean <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/medication_clean.csv", header=T, na.strings= c("", "NA"))
 medication_clean <- remove_empty(medication_clean, c("cols"), cutoff = 1)
 
-meds_wide <- read.csv("Data/3 Cleaned data/Feb 25/meds_wideFeb25.csv", header = T, na.strings = c("", "NA"))
+meds_wide <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/meds_wide.csv", header = T, na.strings = c("", "NA"))
 
-CAH_biomarkers <- read.csv("Data/3 Cleaned data/Feb 25/CAH_biomarkers.csv", header = T, na.strings = c("", "NA"))
+CAH_biomarkers <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/CAH_biomarkers.csv", header = T, na.strings = c("", "NA"))
 
 # N.B: using CAH biomarkers instead of labs_wide due to separation of numbers and unit chrs being present in CAH biomarkers and NOT in labs_wide.
 ```
@@ -62,20 +62,6 @@ sex_stats <- core_relevant %>%
 ```
 
 ```{r : age}
-Today <- today()
-
-core_relevant$Age <- interval(core_relevant$Date.of.Birth, Today) / years(1)
-core_relevant$Age <- round(core_relevant$Age, digits = 1)
-
-core_relevant$Age_category <-
-    cut(core_relevant$Age,
-      breaks = c(0,10,20,30,40,50,60,70,80,90,100),
-      labels = c("0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100"))
-
-age_distribution <- core_relevant %>%
-  group_by(Age_category) %>%
-  summarise(n = n())
-
 age_stats <- core_relevant %>%
   summarise("median age" = median(Age),
             "minimum age" = min(Age),
