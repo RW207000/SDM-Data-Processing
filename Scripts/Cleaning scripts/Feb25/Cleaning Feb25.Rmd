@@ -466,7 +466,7 @@ Let's extract specific biomarkers of interest
 - 17OHP
 - andro
 - renin (convert to plasma renin activity by *0.158)
-- glucose
+- glucose 
 
 ```{r : labs biomarker subset}
 CAH_biomarkers <- select(labs_wide, c("Assessment.ID", "CO.ID", "Date", "17-OHP.value", "17-OHP.interpretation", "Androstenedione.value", "Androstenedione.interpretation", "Renin.value", "Renin.interpretation", "Total testosterone.value", "Total testosterone.interpretation", "Glucose.value", "Glucose.interpretation", "coid_assedate"))
@@ -501,6 +501,17 @@ CAH_biomarkers$Glucose.value <- as.numeric(str_extract(CAH_biomarkers$Glucose.va
 
 CAH_biomarkers_order <- c("Assessment.ID", "CO.ID", "Date", "coid_assedate", "17-OHP.value", "17-OHP.unit", "17-OHP.interpretation", "Androstenedione.value", "Androstenedione.unit", "Androstenedione.interpretation", "Renin.value", "Renin.unit", "Renin.interpretation", "Renin.plasma.activity", "Total testosterone.value", "Total.testosterone.unit", "Total testosterone.interpretation", "Glucose.value", "Glucose.interpretation")
 CAH_biomarkers <- CAH_biomarkers[, CAH_biomarkers_order]
+
+# some column types are 'list' which need to be converted to allow export later on
+CAH_biomarkers$`17-OHP.interpretation` <- as.character(CAH_biomarkers$`17-OHP.interpretation`)
+
+CAH_biomarkers$Androstenedione.interpretation <- as.character(CAH_biomarkers$Androstenedione.interpretation)
+
+CAH_biomarkers$Renin.interpretation <- as.character(CAH_biomarkers$Renin.interpretation)
+
+CAH_biomarkers$`Total testosterone.interpretation` <- as.character(CAH_biomarkers$Renin.interpretation)
+
+CAH_biomarkers$Glucose.interpretation <- as.character(CAH_biomarkers$Glucose.interpretation)
 ```
 
 ```{r : adding Centre IDs to meds_wide and labs_wide}
@@ -523,8 +534,6 @@ write.csv(meds_wide, file = "Data/3 Cleaned data/April 24 Extract (for Irina)/me
 CAH_biomarkers_export <- apply(CAH_biomarkers,2,as.character)
 write.csv(CAH_biomarkers_export, file = "Data/3 Cleaned data/April 24 Extract (for Irina)/CAH_biomarkers.csv", row.names = F, na = "")
 
-# labs_wide
-# labs_wide_export <- labs_wide_export[labs_wide_export$Date >= '2022-12-01',]
 labs_wide_export <- apply(labs_wide,2,as.character)
 write.csv(labs_wide_export, file = "Data/3 Cleaned data/April 24 Extract (for Irina)/labs_wide.csv", row.names = F, na = "")
 ```
@@ -541,10 +550,8 @@ duplicated_assessments <- freqDF_duplicates$Assessment.ID
 all_data <- subset(all_data, !Assessment.ID %in% duplicated_assessments)
 
 # write csv of all_data
-all_data_export <- apply(all_data,2,as.character)
-write.csv(all_data_export, file = "Outputs/Dataframe outputs/April 24 Extract (for Irina)/all_data.csv", row.names = F, na = "")
+write.csv(all_data, file = "Outputs/Dataframe outputs/April 24 Extract (for Irina)/all_data_ICAH_children_2025.csv", row.names = F, na = "")
 ```
-
 
 ```{r : script completion message}
 print("Script complete")
