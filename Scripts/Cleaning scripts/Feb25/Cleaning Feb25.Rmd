@@ -240,7 +240,6 @@ medication_clean$HCeq_dose <-
 
 
 To check that the modified values seem sensible, let's run some basic stats to check for outliers/abnormal values.
-I DON'T REALLY KNOW WHAT ARE SENSIBLE RANGES/VALUES...
 ```{r : basic med stats for outliers}
 # Let's do it first using individual doses
 checkmedstats <- medication_clean %>%

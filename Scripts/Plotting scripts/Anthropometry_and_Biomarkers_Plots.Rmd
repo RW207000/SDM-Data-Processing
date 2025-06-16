@@ -10,9 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Working notes:
-- split testosterone for males into two age groups (<12 and >12), don't need to do for females or NA patients so will require powerpoint manipulation of plots
-- height SDS for the bone age NOT actual age
-- use SDS (from Irina) to calculate height, weight, BMI NOT the raw values
 - apply same time frames as for CaHASE2 (Nov22-23, Nov23-24, Nov24-Feb25)
 
 libraries
@@ -24,7 +21,7 @@ lapply(packages, library, character.only = TRUE)
 
 ```{r : set up #2}
 # read in data
-all_data <- read.csv("Outputs/Dataframe outputs/April 24 Extract (for Irina)/all_data.csv", header=T, na.strings= c("", "NA"))
+all_data <- read.csv("Outputs/Dataframe outputs/April 24 Extract (for Irina)/all_data_ICAH_children_2025.csv", header=T, na.strings= c("", "NA"))
 
 # colours
 myColours <- c("purple", "lightblue", "grey")
@@ -105,16 +102,16 @@ OHP_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = `X17.OHP.value`, fill =
 andro_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = Androstenedione.value, fill = Sex.at.birth)) +
   geom_violin() +
   theme_classic() +
-  ggtitle("Androstenedione concentrations 22-25") +
+  ggtitle("Androstenedione concentrations") +
   geom_point(position = position_jitter(seed = 1, width = 0.2)) +
-  scale_y_break(c(55,70), scale = 0.25) +
+  scale_y_break(c(10,30,55,70), scale = 0.25) +
   scale_y_continuous(breaks = seq(0, 70, by = 2)) +
   geom_hline(yintercept = 8, colour = "red")
 
 testosterone_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = `Total.testosterone.value`, fill = Sex.at.birth)) +
   geom_violin() +
   theme_classic() +
-  ggtitle("Testosterone concentrations 22-25") +
+  ggtitle("Testosterone concentrations") +
   geom_point(position = position_jitter(seed = 1, width = 0.2)) +
   scale_y_continuous(breaks = seq(0, 30, by = 2.5))
 
@@ -142,12 +139,13 @@ testosterone_violin2 <- ggplot(all_data, aes(x = Sex.at.birth, y = `Total.testos
                  aes(group = Age.category))
 #
 
-# renin_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = Renin.plasma.activity, fill = Sex.at.birth)) +
-#   geom_violin() +
-#   theme_classic() +
-#   ggtitle("Renin plasma activity 22-25") +
-#   geom_point(position = position_jitter(seed = 1, width = 0.2)) +
-#   scale_y_continuous(breaks = seq(0, 90, by = 5))
+renin_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = Renin.plasma.activity, fill = Sex.at.birth)) +
+  geom_violin() +
+  theme_classic() +
+  ggtitle("Renin plasma activity") +
+  geom_point(position = position_jitter(seed = 1, width = 0.2)) +
+  scale_y_break(c(55, 100), scale = 0.25)
+
 ```
 
 ```{r : biomarker plots}
@@ -170,9 +168,8 @@ testosterone_all <- MDBoxPlot(all_data, "Total.testosterone.value", "Sex only", 
 #
 
 ## renin plasma activity
-renin_all <- MDBoxPlot(all_data_22_25, "Renin.plasma.activity", "Sex only", "Renin plasma activiy 22-25") +
-  scale_y_break(c(35, 65), scale = 0.25) +
-  scale_y_continuous(breaks = seq(0, 90, by = 5))
+renin_all <- MDBoxPlot(all_data, "Renin.plasma.activity", "SBS", "Renin plasma activiy") +
+scale_y_break(c(40, 100), scale = 0.25)
 
 ## 17OHP
 OHP_all <- MDBoxPlot(all_data, "X17.OHP.value", "NTEO", "17 OHP values 22-25") +
@@ -181,8 +178,8 @@ OHP_all <- MDBoxPlot(all_data, "X17.OHP.value", "NTEO", "17 OHP values 22-25") +
   annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=36, alpha=.5, fill='grey')
 
 ##andro
-andro_all <- MDBoxPlot(all_data, "Androstenedione.value", "Sex only", "Andro values 22-25") +
-  scale_y_break(c(45, 74), scale = 0.25) +
+andro_all <- MDBoxPlot(all_data, "Androstenedione.value", "NTEO", "Andro values") +
+  scale_y_break(c(20, 74), scale = 0.1) + 
   scale_y_continuous(breaks = seq(0, 75, by = 2)) +
   geom_hline(yintercept = 8, colour = "red")
 ```
