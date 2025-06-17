@@ -157,8 +157,8 @@ testosterone_all <- MDBoxPlot(all_data, "Total.testosterone.value", "Sex only", 
 # introduce age category
 # only need age category for males so will need to do some powerpoint cropping
     testosterone_all2 <- ggplot(all_data, aes(x = Sex.at.birth, y = Total.testosterone.value, fill = Age.category, col = Sex.at.birth)) +
-      geom_boxplot(position = position_dodge2(preserve='single'),
-      ) + scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+      geom_boxplot(position = position_dodge2(preserve='single'),) +
+      scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
       labs(title = "Testosterone 22-25", x = "Centre ID", y = "Total.testosterone.value") +
       theme_classic() +
       theme() +

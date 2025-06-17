@@ -71,8 +71,7 @@ HCe_total_daily_doses <- MDBoxPlot(single_therapy, "total_daily_HCeq_dose", "Non
 
 HCe_total_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = total_daily_HCeq_dose, fill = Centre.ID.x)) +
   geom_violin() +
-  theme_classic()
-
+  theme_classic() +
   annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=15, alpha=.5, fill='grey') + geom_hline(yintercept = 11, colour = "red") +
   stat_summary(fun = "mean",
                geom = "point",
