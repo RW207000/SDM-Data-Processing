@@ -185,23 +185,7 @@ andro_all <- MDBoxPlot(all_data, "Androstenedione.value", "NTEO", "Andro values"
 ```
 
 ```{r}
-centre_stats <- all_data_22_25 %>%
-  group_by(Centre.ID.x) %>%
-  summarise("number of patients" = n_unique(CO.ID.x),
-            "number of registry entries" = length(Centre.ID.x))
 
-medication_stats <- all_data_22_25 %>%
-  group_by(Centre.ID.x) %>%
-  summarise("number of med entries" = sum(!is.na(Medicine_1.x)),
-            "missing med" = sum(is.na(Medicine_1.x)))
-
-patients_on_single_per_centre <- all_therapy_22_25_single %>%
-  group_by(Centre.ID.x) %>%
-  summarise("number of patients on single therapy" = n())
-
-patients_on_combined_per_centre <- all_therapy_22_25_combined %>%
-  group_by(Centre.ID.x) %>%
-  summarise("number of patients on combined therapy" = n())
 ```
 
 ```{r : end of script message}

@@ -165,6 +165,9 @@ medication_clean$Time <- round(medication_clean$Time, digits = 2)
 
 # make unique identifier in medication_clean
 medication_clean$coid_assedate <- paste(medication_clean$CO.ID, medication_clean$Date.of.Assessment, sep = " ")
+
+# drop un-necessary column(s)
+medication_clean$Time..military. <- NULL
 ```
 
 Now let's check what units have been used to see if we need to standardise any...
@@ -208,17 +211,6 @@ medication_clean$Medicine <-
 
 medication_clean$Medicine <- 
   ifelse(grepl("hydro", medication_clean$Note, ignore.case = TRUE) | grepl("HC", medication_clean$Note, ignore.case = TRUE) | grepl("emergency", medication_clean$Note, ignore.case = TRUE), (as.character("IM Hydrocortisone")), medication_clean$Medicine)
-
-# ********* IGNORE IF NOT USING FEB25 DATA *********
-
-# # Looking at 'checkdailymedstats' there's an obvious error.
-# # - There's an entry of 'HC' with a dose of '100mg' which is way too high. Could be that the medicine should be IM HC or that the dose should be 10mg...
-# # - Based on the fact that the erroneous record (line 779 in medication_clean) represents the 4th dose for a patient, it's more likely that the medicine is wrong (it's common for the 4th dose to be IM HC) and that it should be IM HC instead of HC.
-# 
-# # Let's fix it!
-# medication_clean$Medicine[466] = "IM Hydrocortisone"
-
-# ********* IGNORE IF NOT USING FEB25 DATA *********
 
 # HCe ratios
 prednisoloneratio <- 5
@@ -428,6 +420,11 @@ meds_wide$`therapy type` <-
           as.character("combined"))
 ```
 
+```{r : add in total daily absoloute dose}
+meds_wide$total_daily_absoloute_dose <- NA
+meds_wide$total_daily_absoloute_dose <- rowSums(cbind(meds_wide$Dose_1, meds_wide$Dose_2, meds_wide$Dose_3, meds_wide$Dose_4, meds_wide$Dose_5, meds_wide$Dose_6), na.rm = TRUE)
+
+```
 
 
 *********************************

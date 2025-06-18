@@ -52,22 +52,22 @@ checkdailymedstats <- all_data %>%
 
 ```{r : med box plots absoloute values}
 # using MDBoxPlot function
-## Dexamethasone
-DexamethasoneBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Dexamethasone",], "Total_raw_dose", "None", "total daily dose dexamethasone 22-23")
-
-## Efmody
-EfmodyBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Efmody",], "Total_raw_dose", "None", "total daily dose efmody 22-23")
-
-## Hydrocortisone
-HydrocortisoneBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Hydrocortisone",], "Total_raw_dose", "None", "total daily dose hydro 22-23")
-
-## Prednisolone
-PrednisoloneBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Prednisolone",], "Total_raw_dose", "None", "total daily dose prednisolone 22-23")
+# ## Dexamethasone
+# DexamethasoneBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Dexamethasone",], "Total_raw_dose", "None", "total daily dose dexamethasone 22-23")
+# 
+# ## Efmody
+# EfmodyBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Efmody",], "Total_raw_dose", "None", "total daily dose efmody 22-23")
+# 
+# ## Hydrocortisone
+# HydrocortisoneBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Hydrocortisone",], "Total_raw_dose", "None", "total daily dose hydro 22-23")
+# 
+# ## Prednisolone
+# PrednisoloneBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Prednisolone",], "Total_raw_dose", "None", "total daily dose prednisolone 22-23")
 ```
 
 ```{r : med box plots HC equivalent}
 # using MDBoxPlot function
-HCe_total_daily_doses <- MDBoxPlot(single_therapy, "total_daily_HCeq_dose", "None", "HC eq")
+HCe_total_daily_doses <- MDBoxPlot(single_therapy, "total_daily_HCeq_dose", "None", "HC http://127.0.0.1:24911/graphics/plot_zoom_png?width=1713&height=832eq")
 
 HCe_total_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = total_daily_HCeq_dose, fill = Centre.ID.x)) +
   geom_violin() +
@@ -115,93 +115,90 @@ HC_equiv_all_meds_22_25 <-
                  aes(group = grouping_med)) +
   scale_y_continuous(breaks = seq(0, 60, by = 2.5)) +
    annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=15, alpha=.5, fill='grey') + geom_hline(yintercept = 11, colour = "red")
-
-
 ```
 
-
 ```{r : dose time histograms}
-# using medTimePlot function
-# this is for all data across all centres
-
-Dex_dose_times_22_23 <- medTimePlot(therapy_22_23_single, "Dexamethasone", "Dexamethasone dose timing (22-23)")
-
-Dex_dose_times_23_25 <- medTimePlot(therapy_23_25_single, "Dexamethasone", "Dexamethasone dose timing (23-25)")
-
-Dex_dose_times_all <- medTimePlot(all_therapy_22_25_single, "Dexamethasone", "Dexamethasone dose timing (22-25)")
-
-Efmody_dose_times_22_23 <- medTimePlot(therapy_22_23_single, "Efmody", "Efmody dose timing (22-23)")
-
-Efmody_dose_times_23_25 <- medTimePlot(therapy_23_25_single, "Efmody", "Efmody dose timing (23-25)")
-
-Efmody_dose_times_all <- medTimePlot(all_therapy_22_25_single, "Efmody", "Efmody dose timing (22-25)")
-
-HC_dose_times_22_23 <- medTimePlot(therapy_22_23_single, "Hydrocortisone", "HC dose timing (22-23)")
-
-HC_dose_times_23_25 <- medTimePlot(therapy_23_25_single, "Hydrocortisone", "HC dose timing (23-25)")
-
-HC_dose_times_all <- medTimePlot(all_therapy_22_25_single, "Hydrocortisone", "HC dose timing (22-25)")
-
-Pred_dose_times_22_23 <- medTimePlot(therapy_22_23_single, "Prednisolone", "Pred dose timing (22-23)")
-
-Pred_dose_times_23_25 <- medTimePlot(therapy_23_25_single, "Prednisolone", "Pred dose timing (23-35)")
-
-Pred_dose_times_all <- medTimePlot(all_therapy_22_25_single, "Prednisolone", "Pred dose timing (22-25)")
+# # using medTimePlot function
+# # this is for all data across all centres
+# 
+# Dex_dose_times_22_23 <- medTimePlot(therapy_22_23_single, "Dexamethasone", "Dexamethasone dose timing (22-23)")
+# 
+# Dex_dose_times_23_25 <- medTimePlot(therapy_23_25_single, "Dexamethasone", "Dexamethasone dose timing (23-25)")
+# 
+# Dex_dose_times_all <- medTimePlot(all_therapy_22_25_single, "Dexamethasone", "Dexamethasone dose timing (22-25)")
+# 
+# Efmody_dose_times_22_23 <- medTimePlot(therapy_22_23_single, "Efmody", "Efmody dose timing (22-23)")
+# 
+# Efmody_dose_times_23_25 <- medTimePlot(therapy_23_25_single, "Efmody", "Efmody dose timing (23-25)")
+# 
+# Efmody_dose_times_all <- medTimePlot(all_therapy_22_25_single, "Efmody", "Efmody dose timing (22-25)")
+# 
+# HC_dose_times_22_23 <- medTimePlot(therapy_22_23_single, "Hydrocortisone", "HC dose timing (22-23)")
+# 
+# HC_dose_times_23_25 <- medTimePlot(therapy_23_25_single, "Hydrocortisone", "HC dose timing (23-25)")
+# 
+# HC_dose_times_all <- medTimePlot(all_therapy_22_25_single, "Hydrocortisone", "HC dose timing (22-25)")
+# 
+# Pred_dose_times_22_23 <- medTimePlot(therapy_22_23_single, "Prednisolone", "Pred dose timing (22-23)")
+# 
+# Pred_dose_times_23_25 <- medTimePlot(therapy_23_25_single, "Prednisolone", "Pred dose timing (23-35)")
+# 
+# Pred_dose_times_all <- medTimePlot(all_therapy_22_25_single, "Prednisolone", "Pred dose timing (22-25)")
 ```
 
 ```{r : raw dose stats}
-raw_dex_doses_22_23 <- summariseMed(therapy_22_23_single, "Dexamethasone", "raw")
-
-raw_dex_doses_23_25 <- summariseMed(therapy_23_25_single, "Dexamethasone", "raw")
-
-raw_dex_doses_all <- summariseMed(all_therapy_22_25_single, "Dexamethasone", "raw")
-
-raw_efmody_doses_22_23 <- summariseMed(therapy_22_23_single, "Efmody", "raw")
-
-raw_efmody_doses_23_25 <- summariseMed(therapy_23_25_single, "Efmody", "raw")
-
-raw_efmody_doses_all <- summariseMed(all_therapy_22_25_single, "Efmody", "raw")
-
-raw_HC_doses_22_23 <- summariseMed(therapy_22_23_single, "Hydrocortisone", "raw")
-
-raw_HC_doses_23_25 <- summariseMed(therapy_23_25_single, "Hydrocortisone", "raw")
-
-raw_HC_doses_all <- summariseMed(all_therapy_22_25_single, "Hydrocortisone", "raw")
-
-raw_pred_doses_22_23 <- summariseMed(therapy_22_23_single, "Prednisolone", "raw")
-
-raw_pred_doses_23_25 <- summariseMed(therapy_23_25_single, "Prednisolone", "raw")
-
-raw_pred_doses_all <- summariseMed(all_therapy_22_25_single, "Prednisolone", "raw")
+# raw_dex_doses_22_23 <- summariseMed(all_data, "Dexamethasone", "absoloute")
+# 
+# raw_dex_doses_23_25 <- summariseMed(therapy_23_25_single, "Dexamethasone", "raw")
+# 
+# raw_dex_doses_all <- summariseMed(all_therapy_22_25_single, "Dexamethasone", "raw")
+# 
+# raw_efmody_doses_22_23 <- summariseMed(therapy_22_23_single, "Efmody", "raw")
+# 
+# raw_efmody_doses_23_25 <- summariseMed(therapy_23_25_single, "Efmody", "raw")
+# 
+# raw_efmody_doses_all <- summariseMed(all_therapy_22_25_single, "Efmody", "raw")
+# 
+# raw_HC_doses_22_23 <- summariseMed(therapy_22_23_single, "Hydrocortisone", "raw")
+# 
+# raw_HC_doses_23_25 <- summariseMed(all_data, "Hydrocortisone", "absoloute")
+# 
+# raw_HC_doses_all <- summariseMed(all_therapy_22_25_single, "Hydrocortisone", "raw")
+# 
+# raw_pred_doses_22_23 <- summariseMed(therapy_22_23_single, "Prednisolone", "raw")
+# 
+# raw_pred_doses_23_25 <- summariseMed(therapy_23_25_single, "Prednisolone", "raw")
+# 
+# raw_pred_doses_all <- summariseMed(all_therapy_22_25_single, "Prednisolone", "raw")
 ```
 
 ```{r : HC equivalent dose stats}
-equiv_dex_doses_22_23 <- summariseMed(therapy_22_23_single, "Dexamethasone", "equiv")
-
-equiv_dex_doses_23_25 <- summariseMed(therapy_23_25_single, "Dexamethasone", "equiv")
-
-equiv_dex_doses_all <- summariseMed(all_therapy_22_25_single, "Dexamethasone", "equiv")
-
-equiv_pred_doses_22_23 <- summariseMed(therapy_22_23_single, "Prednisolone", "equiv")
-
-equiv_pred_doses_23_25 <- summariseMed(therapy_23_25_single, "Prednisolone", "equiv")
-
-equiv_pred_doses_all <- summariseMed(all_therapy_22_25_single, "Prednisolone", "equiv")
+# equiv_dex_doses_22_23 <- summariseMed(therapy_22_23_single, "Dexamethasone", "equiv")
+# 
+# equiv_dex_doses_23_25 <- summariseMed(therapy_23_25_single, "Dexamethasone", "equiv")
+# 
+# equiv_dex_doses_all <- summariseMed(all_therapy_22_25_single, "Dexamethasone", "equiv")
+# 
+# equiv_pred_doses_22_23 <- summariseMed(therapy_22_23_single, "Prednisolone", "equiv")
+# 
+# equiv_pred_doses_23_25 <- summariseMed(therapy_23_25_single, "Prednisolone", "equiv")
+# 
+# equiv_pred_doses_all <- summariseMed(all_therapy_22_25_single, "Prednisolone", "equiv")
 ```
 
 ```{r : HC equivalent per BSA dose stats}
-# error to fix
-equiv_BSA_dex_doses_22_23 <- summariseMed(therapy_22_23_single, "Dexamethasone", "BSA")
-
-equiv_BSA_dex_doses_23_25 <- summariseMed(therapy_23_25_single, "Dexamethasone", "BSA")
-
-equiv_BSA_dex_doses_all <- summariseMed(all_therapy_22_25_single, "Dexamethasone", "BSA")
-
-equiv_BSA_pred_doses_22_23 <- summariseMed(therapy_22_23_single, "Prednisolone", "BSA")
-
-equiv_BSA_pred_doses_23_25 <- summariseMed(therapy_23_25_single, "Prednisolone", "BSA")
-
-equiv_BSA_pred_doses_all <- summariseMed(all_therapy_22_25_single, "Prednisolone", "BSA")
+# # error to fix
+# equiv_BSA_dex_doses_22_23 <- summariseMed(therapy_22_23_single, "Dexamethasone", "BSA")
+# 
+# equiv_BSA_dex_doses_23_25 <- summariseMed(therapy_23_25_single, "Dexamethasone", "BSA")
+# 
+# equiv_BSA_dex_doses_all <- summariseMed(all_therapy_22_25_single, "Dexamethasone", "BSA")
+# 
+# equiv_BSA_pred_doses_22_23 <- summariseMed(therapy_22_23_single, "Prednisolone", "BSA")
+# 
+# equiv_BSA_pred_doses_23_25 <- summariseMed(therapy_23_25_single, "Prednisolone", "BSA")
+# 
+# equiv_BSA_pred_doses_all <- summariseMed(all_therapy_22_25_single, "Prednisolone", "BSA")
 ```
 
 
