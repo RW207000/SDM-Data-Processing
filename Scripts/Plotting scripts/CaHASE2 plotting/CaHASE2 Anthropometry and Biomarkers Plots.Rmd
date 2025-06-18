@@ -1,7 +1,7 @@
 ---
-title: "Anthropometry_and_Biomarkers_Plots"
+title: "CaHASE2 Anthropometry and Biomarkers Plots"
 author: "R.Welch"
-date: "2025-04-08"
+date: "2025-06-18"
 output: html_document
 ---
 
@@ -21,7 +21,7 @@ lapply(packages, library, character.only = TRUE)
 
 ```{r : set up #2}
 # read in data
-all_data <- read.csv("Outputs/Dataframe outputs/April 24 Extract (for Irina)/all_data_ICAH_children_2025.csv", header=T, na.strings= c("", "NA"))
+all_data <- read.csv("Outputs/Dataframe outputs/CaHASE2/all_data_Nov22_Feb25.csv", header=T, na.strings= c("", "NA"))
 
 # colours
 myColours <- c("purple", "lightblue", "grey")

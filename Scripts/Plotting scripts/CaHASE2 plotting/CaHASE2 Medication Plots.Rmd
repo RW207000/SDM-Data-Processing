@@ -1,5 +1,5 @@
 ---
-title: "medicationDataAndPlots"
+title: "CaHASE2 Medication Plots"
 author: "R.Welch"
 date: "2025-16-06"
 output: html_document
@@ -18,7 +18,7 @@ lapply(packages, library, character.only = TRUE)
 
 ```{r : set up #2}
 # read in data
-all_data <- read.csv("Outputs/Dataframe outputs/April 24 Extract (for Irina)/all_data_ICAH_children_2025.csv", header=T, na.strings= c("", "NA"))
+all_data <- read.csv("Outputs/Dataframe outputs/CaHASE2/all_data_Nov22_Feb25.csv", header=T, na.strings= c("", "NA"))
 
 # colours
 myColours <- c("purple", "lightblue", "grey")
@@ -31,8 +31,10 @@ histColours <- c("red", "springgreen2", "royalblue2")
 # remove entries with no medication data
 all_data$Centre.ID.x <- as.factor(all_data$Centre.ID.x)
 all_data <- all_data[!is.na(all_data$Medicine_1),]
-single_therapy <- all_data[all_data$therapy.type == "single",]
-combined_therapy <- all_data[all_data$therapy.type == "combined",]
+# note that now 'all_data' only contains entries WITH medication data (based on whether Medicine_1 was filled in)
+
+single_therapy <- all_data[all_data$`therapy type` == "single",]
+combined_therapy <- all_data[all_data$`therapy type` == "combined",]
 ```
 
 ```{r : basic stats to check for anomalous values in medications}
@@ -67,9 +69,9 @@ checkdailymedstats <- all_data %>%
 
 ```{r : med box plots HC equivalent}
 # using MDBoxPlot function
-HCe_total_daily_doses <- MDBoxPlot(single_therapy, "total_daily_HCeq_dose", "None", "HC http://127.0.0.1:24911/graphics/plot_zoom_png?width=1713&height=832eq")
+HCe_total_daily_doses <- MDBoxPlot(all_data, "total_daily_HCeq_dose", "None", "HCeq")
 
-HCe_total_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = total_daily_HCeq_dose, fill = Centre.ID.x)) +
+HCe_total_violin <- ggplot(all_data, aes(x = Centre.ID.x, y = total_daily_HCeq_dose, fill = Centre.ID.x)) +
   geom_violin() +
   theme_classic() +
   annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=15, alpha=.5, fill='grey') + geom_hline(yintercept = 11, colour = "red") +
@@ -84,7 +86,6 @@ HCe_total_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = total_daily_
 ## Dexamethasone
 HC_equiv_BSA_DexamethasoneBoxPlot_all <- MDBoxPlot(all_therapy_22_25_single[all_therapy_22_25_single$Medicine_1.x == "Dexamethasone",], "HC_equivalent_daily_dose_per_BSA", "None", "HC equiv per BSA total daily dose dexamethasone 22-25")
 
-
 ## Efmody
 HC_equiv_BSA_EfmodyBoxPlot_22_23 <- MDBoxPlot(therapy_22_23_single[therapy_22_23_single$Medicine_1.x == "Efmody",], "HC_equivalent_daily_dose_per_BSA", "None", "HC equiv per BSA total daily dose efmody 22-23")
 
@@ -94,7 +95,6 @@ HC_equiv_BSA_HydrocortisoneBoxPlot_22_25 <- MDBoxPlot(all_therapy_22_25_single[a
 
 ## Prednisolone
 HC_equiv_BSA_PrednisoloneBoxPlot_22_25 <- MDBoxPlot(all_therapy_22_25_single[all_therapy_22_25_single$Medicine_1.x == "Prednisolone",], "HC_equivalent_daily_dose_per_BSA", "None", "HC equiv per BSA total daily dose prednisolone 22-25")  +   annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=15, alpha=.5, fill='grey') + geom_hline(yintercept = 11, colour = "red")
-
 
 ##
 hydro_and_pred_single_22_25 <- all_therapy_22_25_single[all_therapy_22_25_single$Medicine_1.x == "Hydrocortisone" | all_therapy_22_25_single$Medicine_1.x == "Prednisolone",]
@@ -297,17 +297,17 @@ test2 <- ggplot(all_therapy_22_25_single, aes(x = Weight..kg. , y = HC_equivalen
 
 ```{r : checks}
 HC_equiv_BSA_under_8_to_check <- subset(all_therapy_22_25_single, HC_equivalent_daily_dose_per_BSA < 8)
-write.csv(HC_equiv_BSA_under_8_to_check, "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/HC_equiv_BSA_under_8_to_check.csv", row.names = F)
+# write.csv(HC_equiv_BSA_under_8_to_check, "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/HC_equiv_BSA_under_8_to_check.csv", row.names = F)
 
 # individual HC doses <5mg
 HC_meds <- subset(all_therapy_22_25_single, Medicine_1.x == "Hydrocortisone")
 HC_doses_to_check <- subset(HC_meds, Dose_1 < 5 | Dose_2 <5 | Dose_3 <5 | Dose_4 <5)
-write.csv(HC_doses_to_check, "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/HC_doses_to_check.csv", row.names = F)
+# write.csv(HC_doses_to_check, "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/HC_doses_to_check.csv", row.names = F)
 
 # individual Pred doses of >5mg
 Pred_meds <- subset(all_therapy_22_25_single, Medicine_1.x == "Prednisolone")
 Pred_doses_to_check <- subset(Pred_meds, Dose_1 >5 | Dose_2 >5 | Dose_3 >5 | Dose_4 >5)
-write.csv(Pred_doses_to_check, "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/Pred_doses_to_check.csv", row.names = F)
+# write.csv(Pred_doses_to_check, "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/Pred_doses_to_check.csv", row.names = F)
 ```
 
 
