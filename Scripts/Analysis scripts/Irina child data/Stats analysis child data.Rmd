@@ -1,0 +1,169 @@
+---
+title: "Stats analysis"
+author: "R.Welch"
+date: "2025-05-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*********************************
+*********************************
+------Script set up------
+
+```{r : reading libraries, include= FALSE}
+packages <- c("tidyverse", "readxl", "dplyr", "magrittr", "mixtools", "emmeans", "readr","data.table", "lubridate", "ggplot2", "magrittr", "skimr", "ggstatsplot","summarytools", "knitr", "here", "ggthemes", "ggthemes", "Amelia", "tidyr", "naniar", "stringr", "janitor", "readxl")
+
+lapply(packages, library, character.only = TRUE)
+```
+
+```{r : reading in data}
+participantsnoduplicates <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/participantsnoduplicates.csv", header=T, na.strings="")
+# participantsnoduplicates$Date.of.Assessment <- as.Date(participantsnoduplicates$Date.of.Assessment, format = "%d/%m/%Y")
+# ^ contains data entered into registry between 08/01/2019 and 07/02/2025
+
+# ## test
+core_data <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/participantsnoduplicates.csv", header = T, na.strings = c("", "NA"))
+# # THIS IS THIS A RECORD OF EVERYONE IN THE REGISTRY - ONE LINE PER PERSON
+# ##
+
+medication_clean <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/medication_clean.csv", header=T, na.strings= c("", "NA"))
+medication_clean <- remove_empty(medication_clean, c("cols"), cutoff = 1)
+
+meds_wide <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/meds_wide.csv", header = T, na.strings = c("", "NA"))
+
+CAH_biomarkers <- read.csv("Data/3 Cleaned data/April 24 Extract (for Irina)/CAH_biomarkers.csv", header = T, na.strings = c("", "NA"))
+
+# N.B: using CAH biomarkers instead of labs_wide due to separation of numbers and unit chrs being present in CAH biomarkers and NOT in labs_wide.
+```
+
+*********************************
+Make 'core_relevant' based on the CO.IDs present in the participants frame covering the time frame you're interested in.
+
+```{r : removing participant info for those out of time frame}
+CO.IDs <- unique(participantsnoduplicates$CO.ID)
+
+core_relevant <- subset(core_data, CO.ID %in% CO.IDs)
+core_relevant$Date.of.Birth <- as.Date(core_relevant$Date.of.Birth, format = "%d/%m/%Y")
+```
+
+*********************************
+------Basic stats------
+- USE CORE_RELEVANT FOR STATS HERE SO THAT EACH PATIENT COUNTS AS A SINGLE DATA POINT (not however many number of entries they have).
+- sex distribution
+- age distribution
+
+```{r : sex}
+sex_stats <- core_relevant %>%
+  group_by(Sex.at.birth) %>%
+  summarise(n = n())
+```
+
+```{r : age}
+age_stats <- core_relevant %>%
+  summarise("median age" = median(Age),
+            "minimum age" = min(Age),
+            "maximun age" = max(Age))
+```
+
+
+*********************************
+------Visit stats------
+- patients per centre
+- visits per centre
+- number of medication entries
+- number of lab entries (?)
+
+```{r : patients and visits per centre}
+centre_stats <-participantsnoduplicates %>%
+  group_by(Centre.ID) %>%
+  summarise("number of patients assessed" = n_unique(CO.ID),
+            "number of registry entries" = n())
+
+# note that the 'number of patients' is the number of patients who have been assessed and had =>1 entry into the registry, NOT THE TOTAL NUMBER OF PATIENTS RECRUITED.
+```
+
+```{r : visit stats}
+visitsperparticipant <- participantsnoduplicates %>%
+  group_by(CO.ID) %>%
+  summarise(n = n())
+
+overallvisitsstats <- visitsperparticipant %>%
+  summarise("total number of patients" = n(),
+            "total number of visits" = sum(n),
+            meanvisits = mean(n, na.rm = TRUE),
+            medianvisits = median(n, na.rm = TRUE),                                            
+            sdvisits = sd(n, na.rm = TRUE),
+            minvisits = min(n, na.rm = TRUE),
+            maxvisits = max(n, na.rm = TRUE)) %>%
+  round(digits = 2)
+```
+
+
+*********************************
+*********************************
+
+*********************************
+------Medication: stats ------
+
+Start with working out how many visits each participant had where medication data was recorded
+```{r : medication entries}
+medication_entries_per_patient <- meds_wide %>%
+  group_by(CO.ID) %>%
+  summarise(n = n())
+```
+
+```{r : medication stats}
+overallvisitsstats$patientswithmed <- n_unique(meds_wide$CO.ID)
+
+overallvisitsstats$visitswithmed <- n_unique(meds_wide$Assessment.ID)
+```
+
+```{r : prescriptions - medicines}
+medication_clean$prescribedmedperpatient <- paste(medication_clean$coid_asse_id, medication_clean$Medicine)
+  
+medprescriptions <- subset(medication_clean, assessment_entry == 1)
+
+all_prescriptions <- medprescriptions %>%
+  group_by(Medicine) %>%
+  summarise(n = n()) %>%
+  pivot_wider(names_from = Medicine,
+              values_from = n)
+
+othermeds <- subset(medication_clean, Medicine == "Other")
+```
+
+```{r}
+
+```
+
+
+
+```{r : total daily dose trends per medication, per centre, include=FALSE}
+
+```
+
+
+
+
+*********************************
+*********************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

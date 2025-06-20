@@ -132,17 +132,9 @@ freqcheck <- freqcheck[freqcheck$idvisitdate != c("Total", "<NA>"),]
 ```
 
 
-I need to add in various columns using BSA
-```{r}
-participantsnoduplicates$`BSA (no height available)` <- NA
-
-a <- (0.8168 - (0.0154 * log10(participantsnoduplicates$Weight..kg. * 1000)))
-b <- 4.688 * (participantsnoduplicates$Weight..kg. * 1000)^a
-participantsnoduplicates$`BSA (no height available)` <- b / 10000
-participantsnoduplicates$`BSA (no height available)` <- round(participantsnoduplicates$`BSA (no height available)`, digits = 2)
-```
-
 *********************************
+*********************************
+
 ------Medication: cleaning ------
 
 Let's start by cleaning medication data frame (units, typos, standardised doses)
@@ -222,7 +214,7 @@ medication_clean$Medicine <-
 
 # HCe ratios
 prednisoloneratio <- 5
-dexamethasoneratio <- 40
+dexamethasoneratio <- 80
 
 # add in HCe values
 medication_clean$HCeq_dose <- NA
@@ -236,13 +228,6 @@ medication_clean$HCeq_dose <-
 
 medication_clean$HCeq_dose <- 
   ifelse(medication_clean$Medicine == "Dexamethasone", (as.numeric(medication_clean$Dose) * dexamethasoneratio), medication_clean$HCeq_dose)
-```
-
-
-```{r : clean absolute doses and add HCe/BSA}
-# clean up absolute values (to exclude IM HC values which will otherwise skew totals)
-medication_clean$clean_absolute_dose <- 
-  ifelse(medication_clean$Medicine == "IM Hydrocortisone", NA, medication_clean$Dose)
 ```
 
 
@@ -262,8 +247,7 @@ checkmedstats <- medication_clean %>%
 # calculate total daily HCeq doses per patient
 medperpatient <- medication_clean %>%
   group_by(Assessment.ID) %>%
-  summarise(total_daily_HCeq_dose = sum(HCeq_dose, na.rm = TRUE),
-            total_absolute_daily_dose = sum(clean_absolute_dose, na.rm = TRUE))
+  summarise(total_daily_HCeq_dose = sum(HCeq_dose, na.rm = TRUE))
 
 # join ^ to medication_clean
 medication_clean <- full_join(medication_clean, medperpatient, by = "Assessment.ID")
@@ -293,6 +277,7 @@ Now you have a cleaned medication frame:
   * Efmody and IM HC have both been correctly added into Medicine column (from note column)
   * HCeq values have been added (pred *5, dex *40)
   * Entries with 'IM HC' and 'Other' medicines have been isolated (othermeds)
+
 
 
 *********************************
@@ -417,19 +402,16 @@ meds_wide <- left_join(meds_wide, doses_per_patient_2, by = c("coid_assedate_1" 
 remove(totalmed_1st_entry, totalmed_2nd_entry, totalmed_3rd_entry, totalmed_4th_entry, totalmed_5th_entry, totalmed_6th_entry)
 
 # drop unnecessary columns from meds_wide (e.g.: duplicated 'coid_asse_date')
-meds_wide <- meds_wide[-c(14,15,22,23,24,27,28,35,36,37,40,41,46,47,48,49,50)]
+# meds_wide <- meds_wide[-c(12, 19, 20, 22, 29, 30, 32, 37, 38)]
 ```
+Now we have a single line per visit and all doses in a single row.
 
-```{r : add in total absolute daily dose}
-meds_wide$'total absolute daily dose' <- NA
-meds_wide$`total absolute daily dose` <- rowSums(cbind(meds_wide$clean_absolute_dose_1, meds_wide$clean_absolute_dose_2, meds_wide$clean_absolute_dose_3), na.rm = TRUE)
-```
 
-```{r : therapy type - single or combined}
-meds_wide$`therapy type` <- NA
+```{r : therapy types - single or combined}
+meds_wide$`therapy type` <- "single or combined"
 
-meds_wide$`therapy type` <- 
-  ifelse(!is.na(meds_wide$Medicine_1) &
+meds_wide$`therapy type` <-
+    ifelse(!is.na(meds_wide$Medicine_1) &
          (is.na(meds_wide$Medicine_2) & is.na(meds_wide$Medicine_3) & is.na(meds_wide$Medicine_4) |
           meds_wide$Medicine_1 == meds_wide$Medicine_2 & is.na(meds_wide$Medicine_3) & is.na(meds_wide$Medicine_4) |
           meds_wide$Medicine_1 == meds_wide$Medicine_2 & meds_wide$Medicine_1 == meds_wide$Medicine_3 & is.na(meds_wide$Medicine_4) |
@@ -562,16 +544,9 @@ freqDF_duplicates <- rownames_to_column(freqDF_duplicates, var = "Assessment.ID"
 duplicated_assessments <- freqDF_duplicates$Assessment.ID
 
 all_data <- subset(all_data, !Assessment.ID %in% duplicated_assessments)
-```
 
-```{r : add in HCe/BSA}
-all_data$`HCe total daily dose per BSA` <- NA
-all_data$`HCe total daily dose per BSA` <- all_data$total_daily_HCeq_dose / all_data$`BSA (no height available)`
-```
-
-```{r}
 # write csv of all_data
-write.csv(all_data, file = "Outputs/Dataframe outputs/CaHASE2/all_data_Nov22_Feb25.csv", row.names = F, na = "")
+write.csv(all_data, file = "Outputs/Dataframe outputs/April 24 Extract (for Irina)/all_data_ICAH_children_2025.csv", row.names = F, na = "")
 ```
 
 ```{r : script completion message}
