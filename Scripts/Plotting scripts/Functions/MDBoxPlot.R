@@ -61,8 +61,7 @@ MDBoxPlot <- function (MDS, Param, splitType, ttl) {
     paramData <- paramData %>% rename(param = 3)
     
     #box plot
-    graph <- ggplot(data = paramData,
-                    aes(x = Centre.ID.x, y = param, fill = Sex.at.birth, col = Sex.at.birth)) +
+    graph <- ggplot(data = paramData, aes(x = Centre.ID.x, y = param, fill = Sex.at.birth, col = Sex.at.birth)) +
       geom_boxplot(position = position_dodge2(preserve='single')) +
       labs(title = ttl, x = "Centre ID", y = Param) + 
       theme_classic() +
