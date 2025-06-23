@@ -23,24 +23,33 @@ lapply(packages, library, character.only = TRUE)
 
 
 ```{r : reading in data}
-participants_all <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Core + Longitudinal UK 07.04.24 - shared with PI.csv",header=T, na.strings="")
+# need to include Ireland data - merge in using rbind
+participants_all <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Core + Longitudinal UK 07.04.24 - shared with PI.csv", header=T, na.strings="")
+participants_all_ireland <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Core + Longitudinal Ireland 11.06.csv", header=T, na.strings="")
+participants_all <- rbind(participants_all, participants_all_ireland)
 participants_all$Date.of.Assessment <- as.Date(participants_all$Date.of.Assessment, format = "%d/%m/%Y")
 
-#ASK ABOUT TIME FRAME
+#ASK ABOUT TIME FRAMES
 # add in time frame
 participants <- participants_all
 #[participants_all$Date.of.Assessment >= "2022-12-01",]
 
 SDS_age_sex <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSforage&sex.csv", header=T, na.strings="")
-
 SDS_height_bone_age <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSheightforBA.csv", header=T, na.strings="")
 
 medication <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Glucocorticoids Data UK 07.04.25 shared with PI.csv", header=T, na.strings= c("", "NA"))
+medication_ireland <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Glucocorticoids Data Ireland 11.06.25.csv", header = T, na.strings = "")
+medication <- rbind(medication, medication_ireland)
 medication <- remove_empty(medication, c("cols"), cutoff = 1)
 
 labs_all <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Labs UK 07.04.25 shared with PI.csv", header=T, na.strings= c("", "NA"))
+labs_ireland <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Labs Ireland 11.06.25.csv", header = T, na.strings= c("", "NA"))
+labs_all <- rbind(labs_all, labs_ireland)
 labs_all$Date <- as.Date(labs_all$Date, format = "%d/%m/%Y")
 labs <- labs_all
+
+
+remove(participants_all_ireland, medication_ireland, labs_ireland)
 ```
 
 ```{r : editing raw data frames}
