@@ -36,6 +36,7 @@ participants <- participants_all
 
 SDS_age_sex <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSforage&sex.csv", header=T, na.strings="")
 SDS_height_bone_age <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSheightforBA.csv", header=T, na.strings="")
+SDS_ireland <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/IrelandSDS1.csv", header = T, na.strings = "")
 
 medication <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Glucocorticoids Data UK 07.04.25 shared with PI.csv", header=T, na.strings= c("", "NA"))
 medication_ireland <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Glucocorticoids Data Ireland 11.06.25.csv", header = T, na.strings = "")
@@ -47,7 +48,6 @@ labs_ireland <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/
 labs_all <- rbind(labs_all, labs_ireland)
 labs_all$Date <- as.Date(labs_all$Date, format = "%d/%m/%Y")
 labs <- labs_all
-
 
 remove(participants_all_ireland, medication_ireland, labs_ireland)
 ```
@@ -63,13 +63,28 @@ medication <- left_join(medication, Centre.IDs, by = "CO.ID")
 # remove repeated/un-necessary columns from SDS dataframes
 SDS_age_sex <- select(SDS_age_sex, c("Assessment.ID", "HeightSDS", "WeightSDS", "BMISDS"))
 SDS_height_bone_age <- select(SDS_height_bone_age, c("Assessment.ID", "AgeatBA", "BA", "HeightSDSforBA"))
+SDS_ireland_age_sex <- select(SDS_ireland, c("Assessment.ID", "HeightSDS", "WeightSDS", "BMISDS"))
+SDS_ireland_bone_age <- select(SDS_ireland, c("Assessment.ID", "AgeatBA", "BA", "HeightSDSforBA"))
+```
+
+```{r}
+# merge Ireland SDS frames to UK frames
+SDS_age_sex_all <- rbind(SDS_age_sex, SDS_ireland_age_sex)
+SDS_height_bone_age_all <- rbind(SDS_height_bone_age, SDS_ireland_bone_age)
 
 # merge SDS frames to participants
-participants <- left_join(participants, SDS_age_sex, by = "Assessment.ID")
-participants <- left_join(participants, SDS_height_bone_age, by = "Assessment.ID")
+participants <- left_join(participants, SDS_age_sex_all, by = "Assessment.ID")
+participants <- left_join(participants, SDS_height_bone_age_all, by = "Assessment.ID")
 
 # add in age category (<12 and >12)
 participants$`Age category` <- ifelse(participants$Age <12, as.character("under 12"), as.character("over 12"))
+```
+
+
+```{r : calculating z scores}
+# participants$z_score_height_test <- (participants$Height..cm. - mean(participants$Height..cm., na.rm = TRUE)) / sd(participants$Height..cm., na.rm = TRUE)
+
+# ^ DOESN'T MATCH IRINA's VALUES
 ```
 
 *********************************
@@ -553,7 +568,15 @@ freqDF_duplicates <- rownames_to_column(freqDF_duplicates, var = "Assessment.ID"
 duplicated_assessments <- freqDF_duplicates$Assessment.ID
 
 all_data <- subset(all_data, !Assessment.ID %in% duplicated_assessments)
+```
 
+```{r : adding in per HCe/BSA}
+all_data$`HCe total daily dose per BSA` <- NA
+all_data$`HCe total daily dose per BSA` <- all_data$total_daily_HCeq_dose / all_data$BA
+```
+
+
+```{r}
 # write csv of all_data
 write.csv(all_data, file = "Outputs/Dataframe outputs/April 24 Extract (for Irina)/all_data_ICAH_children_2025.csv", row.names = F, na = "")
 ```
