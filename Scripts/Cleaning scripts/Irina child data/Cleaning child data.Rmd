@@ -571,8 +571,8 @@ all_data <- subset(all_data, !Assessment.ID %in% duplicated_assessments)
 ```
 
 ```{r : adding in per HCe/BSA}
-all_data$`HCe total daily dose per BSA` <- NA
-all_data$`HCe total daily dose per BSA` <- all_data$total_daily_HCeq_dose / all_data$BA
+# all_data$`HCe total daily dose per BSA` <- NA
+all_data$`HCe total daily dose per BSA` <- all_data$total_daily_HCeq_dose / all_data$BSA
 ```
 
 
