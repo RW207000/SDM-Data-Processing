@@ -67,12 +67,20 @@ checkdailymedstats <- all_data %>%
 
 ```{r : med box plots HC equivalent}
 # using MDBoxPlot function
-HCe_total_daily_doses <- MDBoxPlot(single_therapy, "total_daily_HCeq_dose", "None", "HC http://127.0.0.1:24911/graphics/plot_zoom_png?width=1713&height=832eq")
+HCe_total_daily_doses <- MDBoxPlot(single_therapy, "total_daily_HCeq_dose", "None", "HC total daily dose")
 
 HCe_total_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = total_daily_HCeq_dose, fill = Centre.ID.x)) +
   geom_violin() +
   theme_classic() +
   annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=15, alpha=.5, fill='grey') + geom_hline(yintercept = 11, colour = "red") +
+  stat_summary(fun = "mean",
+               geom = "point",
+               color = "black")
+
+HCe_total_daily_doses_per_BSA <- MDBoxPlot(single_therapy, "HCe.total.daily.dose.per.BSA", "None", "Total daily HCe / m2")
+
+HCe_total_daily_doses_per_BSA_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = HCe.total.daily.dose.per.BSA, fill = Centre.ID.x)) + geom_violin() +
+  theme_classic() +
   stat_summary(fun = "mean",
                geom = "point",
                color = "black")
