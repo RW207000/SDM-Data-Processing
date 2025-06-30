@@ -5,7 +5,6 @@ date: "2025-05-19"
 output: html_document
 ---
 
-for Irina's child data
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -23,23 +22,16 @@ lapply(packages, library, character.only = TRUE)
 
 
 ```{r : reading in data}
-participants_all <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Core + Longitudinal UK 07.04.24 - shared with PI.csv",header=T, na.strings="")
+participants_all <- read.csv("Data/1 Registry extracts/CaHASE2 Feb 25 Extract/Longitudinal data 24.02.2025.csv",header=T, na.strings="")
 participants_all$Date.of.Assessment <- as.Date(participants_all$Date.of.Assessment, format = "%d/%m/%Y")
 
-#ASK ABOUT TIME FRAME
 # add in time frame
-participants <- participants_all
-#[participants_all$Date.of.Assessment >= "2022-12-01",]
+participants <- participants_all[participants_all$Date.of.Assessment >= "2022-12-01",]
 
-
-SDS_age_sex <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSforage&sex.csv", header=T, na.strings="")
-
-SDS_height_bone_age <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSheightforBA.csv", header=T, na.strings="")
-
-medication <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Glucocorticoids Data UK 07.04.25 shared with PI.csv", header=T, na.strings= c("", "NA"))
+medication <- read.csv("Data/1 Registry extracts/CaHASE2 Feb 25 Extract/Glucocorticoids Data 24.02.2025.csv", header=T, na.strings= c("", "NA"))
 medication <- remove_empty(medication, c("cols"), cutoff = 1)
 
-labs_all <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/CAH Labs UK 07.04.25 shared with PI.csv", header=T, na.strings= c("", "NA"))
+labs_all <- read.csv("Data/1 Registry extracts/CaHASE2 Feb 25 Extract/Labs data 24.02.2025.csv", header=T, na.strings= c("", "NA"))
 labs_all$Date <- as.Date(labs_all$Date, format = "%d/%m/%Y")
 labs <- labs_all
 ```
@@ -51,17 +43,6 @@ Centre.IDs <- select(participants, c("CO.ID", "Centre.ID"))
 Centre.IDs <- distinct(Centre.IDs, .keep_all = TRUE)
 
 medication <- left_join(medication, Centre.IDs, by = "CO.ID")
-
-# remove repeated/un-necessary columns from SDS dataframes
-SDS_age_sex <- select(SDS_age_sex, c("Assessment.ID", "HeightSDS", "WeightSDS", "BMISDS"))
-SDS_height_bone_age <- select(SDS_height_bone_age, c("Assessment.ID", "AgeatBA", "BA", "HeightSDSforBA"))
-
-# merge SDS frames to participants
-participants <- left_join(participants, SDS_age_sex, by = "Assessment.ID")
-participants <- left_join(participants, SDS_height_bone_age, by = "Assessment.ID")
-
-# add in age category (<12 and >12)
-participants$`Age category` <- ifelse(participants$Age <12, as.character("under 12"), as.character("over 12"))
 ```
 
 *********************************
@@ -536,21 +517,21 @@ labs_wide <- left_join(labs_wide, Centre.IDs, by = "CO.ID")
 
 ```{r : write outputs}
 # participantsnoduplicates (for sex and age distributions)
-write.csv(participantsnoduplicates, file = "Data/3 Cleaned data/April 24 Extract (for Irina)/participantsnoduplicates.csv", row.names = F, na = "")
+write.csv(participantsnoduplicates, file = "Data/3 Cleaned data/CaHASE2 Feb 25 extract/participantsnoduplicates.csv", row.names = F, na = "")
 
 # medication_clean
-write.csv(medication_clean, file = "Data/3 Cleaned data/April 24 Extract (for Irina)/medication_clean.csv", row.names = F, na = "")
+write.csv(medication_clean, file = "Data/3 Cleaned data/CaHASE2 Feb 25 extract/medication_clean.csv", row.names = F, na = "")
 
 # meds_wide
-write.csv(meds_wide, file = "Data/3 Cleaned data/April 24 Extract (for Irina)/meds_wide.csv", row.names = F, na = "")
+write.csv(meds_wide, file = "Data/3 Cleaned data/CaHASE2 Feb 25 extract/meds_wide.csv", row.names = F, na = "")
 
 # CAH biomarkers
 # CAH_biomarkers <- CAH_biomarkers[CAH_biomarkers$Date >= '2022-12-01',]
 CAH_biomarkers_export <- apply(CAH_biomarkers,2,as.character)
-write.csv(CAH_biomarkers_export, file = "Data/3 Cleaned data/April 24 Extract (for Irina)/CAH_biomarkers.csv", row.names = F, na = "")
+write.csv(CAH_biomarkers_export, file = "Data/3 Cleaned data/CaHASE2 Feb 25 extract/CAH_biomarkers.csv", row.names = F, na = "")
 
 labs_wide_export <- apply(labs_wide,2,as.character)
-write.csv(labs_wide_export, file = "Data/3 Cleaned data/April 24 Extract (for Irina)/labs_wide.csv", row.names = F, na = "")
+write.csv(labs_wide_export, file = "Data/3 Cleaned data/CaHASE2 Feb 25 extract/labs_wide.csv", row.names = F, na = "")
 ```
 
 ```{r : merge dataframes}
