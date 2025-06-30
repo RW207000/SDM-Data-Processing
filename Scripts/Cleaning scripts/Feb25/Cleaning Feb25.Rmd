@@ -31,6 +31,7 @@ participants_all$Date.of.Assessment <- as.Date(participants_all$Date.of.Assessme
 participants <- participants_all
 #[participants_all$Date.of.Assessment >= "2022-12-01",]
 
+
 SDS_age_sex <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSforage&sex.csv", header=T, na.strings="")
 
 SDS_height_bone_age <- read.csv("Data/1 Registry extracts/April 24 Extract (for Irina)/icahukSDSheightforBA.csv", header=T, na.strings="")
