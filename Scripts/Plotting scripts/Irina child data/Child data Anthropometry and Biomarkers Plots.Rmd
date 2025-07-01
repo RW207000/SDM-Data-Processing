@@ -10,7 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Working notes:
-- apply same time frames as for CaHASE2 (Nov22-23, Nov23-24, Nov24-Feb25)
+- apply time frames based on tranche dates
+1st collection: 2022-09-30
+2nd collection: 2024-03-31
+3rd collection: 2025-04-07
 
 libraries
 ```{r : reading libraries, include= FALSE}
@@ -30,22 +33,41 @@ myColours <- c("purple", "lightblue", "grey")
 font_add(family = "Arial", regular = "Arial.ttf")
 
 all_data$Centre.ID.x <- as.factor(all_data$Centre.ID.x)
+
+all_data$Date.of.Assessment <- as.Date(all_data$Date.of.Assessment, format = "%Y-%m-%d")
+
+# make time frames based on tranche dates
+before_2022 <- all_data %>%
+  filter(Date.of.Assessment <= "2022-09-30")
+
+first_to_second <- all_data %>%
+  filter(Date.of.Assessment > "2022-09-30" & Date.of.Assessment <= "2024-03-31")
+
+second_to_third <- all_data %>%
+  filter(Date.of.Assessment > "2024-03-31")
+```
+
+```{r : violin plot - height SDS for BA}
+heightforBA <- Violin(all_data, "HeightSDSforBA", "None", "HeightSDS for Bone age (all data)")
+
+heightforBA_before_first_collection <- Violin(before_2022, "HeightSDSforBA", "None", "HeightSDS for Bone age (before first collection)")
+
+heightforBA_2022_2024 <- Violin(first_to_second, "HeightSDSforBA", "None", "HeightSDS for Bone age (2022-2024)")
+
+heightforBA_2024_2025 <- Violin(second_to_third, "HeightSDSforBA", "None", "HeightSDS for Bone age (2024-2025)")
 ```
 
 
-```{r : anthro plots}
-# height
-height_all <- MDBoxPlot(all_data, "HeightSDSforBA", "SBS", "Height SDS for BA")+
-  scale_y_continuous(breaks = seq(-6, 6, by = 2))
- 
-weight_all <- MDBoxPlot(all_data, "WeightSDS", "SBS", "Weight SDS") +
-  ylim(-5, 7)
+```{r : violin plot - height SDS for chronological age}
+heightforCA <- Violin(all_data, "HeightSDS", "HeightSDS for chronological age (all data)", -4) + ylim(-5,5)
 
-BMI <- MDBoxPlot(all_data, "BMISDS", "None", "BMI SDS") +
-  ylim(-5,7.5)
+heightforCA_before_first_collection <- Violin(before_2022, "HeightSDS", "HeightSDS for chronological age (before first collection)", -4) + ylim(-5,5)
 
-age <- MDBoxPlot(all_data, "Age", "None", "Age")
+heightforCA_2022_2024 <- Violin(first_to_second, "HeightSDS", "HeightSDS for chronological age (2022-2024)", -4) + ylim(-5,5)
+
+heightforCA_2024_2025 <- Violin(second_to_third, "HeightSDS", "HeightSDS for chronological age (2024-2025)", -4) + ylim(-5,5)
 ```
+
 
 ```{r : violin plots}
 BMI_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = BMISDS, fill = Sex.at.birth)) +
