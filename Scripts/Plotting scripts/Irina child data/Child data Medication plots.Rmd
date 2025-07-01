@@ -67,9 +67,9 @@ checkdailymedstats <- all_data %>%
 
 ```{r : med box plots HC equivalent}
 # using MDBoxPlot function
-HCe_total_daily_doses <- MDBoxPlot(single_therapy, "total_daily_HCeq_dose", "None", "HC total daily dose")
+HCe_total_daily_doses <- MDBoxPlot(all_data, "total_daily_HCeq_dose", "None", "HC total daily dose")
 
-HCe_total_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = total_daily_HCeq_dose, fill = Centre.ID.x)) +
+HCe_total_violin <- ggplot(all_data, aes(x = Centre.ID.x, y = total_daily_HCeq_dose, fill = Centre.ID.x)) +
   geom_violin() +
   theme_classic() +
   annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=15, alpha=.5, fill='grey') + geom_hline(yintercept = 11, colour = "red") +
@@ -77,9 +77,9 @@ HCe_total_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = total_daily_
                geom = "point",
                color = "black")
 
-HCe_total_daily_doses_per_BSA <- MDBoxPlot(single_therapy, "HCe.total.daily.dose.per.BSA", "None", "Total daily HCe / m2")
+HCe_total_daily_doses_per_BSA <- MDBoxPlot(all_data, "HCe.total.daily.dose.per.BSA", "None", "Total daily HCe / m2")
 
-HCe_total_daily_doses_per_BSA_violin <- ggplot(single_therapy, aes(x = Centre.ID.x, y = HCe.total.daily.dose.per.BSA, fill = Centre.ID.x)) + geom_violin() +
+HCe_total_daily_doses_per_BSA_violin <- ggplot(all_data, aes(x = Centre.ID.x, y = HCe.total.daily.dose.per.BSA, fill = Centre.ID.x)) + geom_violin() +
   theme_classic() +
   stat_summary(fun = "mean",
                geom = "point",
@@ -209,7 +209,6 @@ HC_equiv_all_meds_22_25 <-
 # equiv_BSA_pred_doses_all <- summariseMed(all_therapy_22_25_single, "Prednisolone", "BSA")
 ```
 
-
 ```{r : therapy dose trends}
 therapy_22_23_single$Centre.ID.x <- as.factor(therapy_22_23_single$Centre.ID.x)
 therapy_23_25_single$Centre.ID.x <- as.factor(therapy_23_25_single$Centre.ID.x)
@@ -233,7 +232,6 @@ therapy_dose_trends_all <- ggplot(all_therapy_22_25_single, aes(x = Centre.ID.x,
   theme_minimal() +
   geom_point(position = position_dodge(width = 0.75))
 ```
-
 
 ```{r : therapy dose trends with facet wrap - HC equivalent total daily doses}
 therapy_dose_trends_22_23 <- ggplot(therapy_22_23_single, aes(x = Centre.ID.x, y = HC_equivalent_daily_dose_1_1, fill = Medicine_1.x)) +
@@ -294,14 +292,7 @@ test2 <- ggplot(all_therapy_22_25_single, aes(x = Weight..kg. , y = HC_equivalen
 
 ```{r}
 # how many patients are on single and combined therapies per centre
-
-
-
-
 ```
-
-
-
 
 ```{r : checks}
 HC_equiv_BSA_under_8_to_check <- subset(all_therapy_22_25_single, HC_equivalent_daily_dose_per_BSA < 8)
@@ -317,7 +308,6 @@ Pred_meds <- subset(all_therapy_22_25_single, Medicine_1.x == "Prednisolone")
 Pred_doses_to_check <- subset(Pred_meds, Dose_1 >5 | Dose_2 >5 | Dose_3 >5 | Dose_4 >5)
 write.csv(Pred_doses_to_check, "C:/Users/md1rwe/Documents/Data extractions from I-CAH/Feb 2025/I-CAH_data_Feb_2025/Pred_doses_to_check.csv", row.names = F)
 ```
-
 
 ```{r : script completion message}
 print("Script complete")

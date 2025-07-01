@@ -80,13 +80,6 @@ participants <- left_join(participants, SDS_height_bone_age_all, by = "Assessmen
 participants$`Age category` <- ifelse(participants$Age <12, as.character("under 12"), as.character("over 12"))
 ```
 
-
-```{r : calculating z scores}
-# participants$z_score_height_test <- (participants$Height..cm. - mean(participants$Height..cm., na.rm = TRUE)) / sd(participants$Height..cm., na.rm = TRUE)
-
-# ^ DOESN'T MATCH IRINA's VALUES
-```
-
 *********************************
 *********************************
 ------Removing duplicates------
