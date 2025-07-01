@@ -535,6 +535,9 @@ write.csv(labs_wide_export, file = "Data/3 Cleaned data/CaHASE2 Feb 25 extract/l
 ```
 
 ```{r : merge dataframes}
+
+#CAH_biomarkers_fixed <- mergeBioMarkerEntries(CAH_biomarkers)
+
 all_data <- left_join(participantsnoduplicates, CAH_biomarkers, by = "Assessment.ID")
 all_data <- left_join(all_data, meds_wide, by = "Assessment.ID")
 

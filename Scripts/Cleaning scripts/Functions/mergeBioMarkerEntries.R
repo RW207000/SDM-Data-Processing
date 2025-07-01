@@ -9,50 +9,62 @@ mergeBioMarkerEntries <- function (rawBM) {
   
   for (uniqueID in uniqueAssessmentIDs) {
     
+
     thisBM <- rawBM[rawBM$Assessment.ID == uniqueID, ]
     thisBMfix <- thisBM[1,]
     
-    if (nrow(thisBM) > 1) {
+    if (nrow(thisBM) > 1) { # is there more than one entry?
       
       earliestDate = min(thisBM$Date)
       
-      for (colNum in BMcolNums) {
+      for (colNum in BMcolNums) { # loop over columns
         
         vals <- thisBM[, colNum, drop = TRUE]
-        #print(vals)
         
-        if (!(all(is.na(vals)) | all(is.null(vals)))) { # is the whole section not empty?
+        
+        if (!(all(is.na(vals)) | all(is.null(vals)))) { # is the whole section not empty or NULL?
           
-          if (typeof(vals) == "character") {
+          vals = vals[!is.na(vals)] # remove NA values
+          
+          if (typeof(vals) == "character") { # is the data text
             
-            a = 1
+            if (n_unique(vals) == 1) {
+              correct <- unique(vals)
+            }
             
-            if (all(vals == "NULL")) {
-              correct = "NULL"
+            else if (n_unique(vals[vals != "NULL"]) == 1) {
+              correct <- unique(vals[vals != "NULL"])
             }
-            else if (sum(vals == "NULL") != 1) {
-              correct = vals[vals != "NULL"]
-            }
+            
             else {
-              print("More than one non-NULL value, unsure which to pick!")
-              correct = "NULL"            
+              #print("More than one non-NULL value, unsure which to pick! Values:")
+              print(vals)
+              correct = "NULL" # otherwise use null, and flag it up
             }
-            
-            thisBMfix[1, colNum] <- correct
-            
+   
           }
           else if (typeof(vals) == "double") {
             
-            if (n_unique(vals) == 1) {
+            if (n_unique(vals) == 1 & !any(is.na(vals))) {
               correct  = unique(vals)
             }
+            else if (sum(!is.na(vals)) == 1) { 
+              correct = vals[!is.na(vals)] # if there is only one non-NA value, use that one
+            }
             else {
-              correct = vals[!is.na(vals)]
+              correct = NA
+              #print("Multiple non-NA values, unsure which to pick! Values: ")
+              print(vals)
             }
             
           }
           
         }
+        else {
+          correct <- vals[1]
+        }
+        
+        thisBMfix[1, colNum] <- correct
         
       }
       
