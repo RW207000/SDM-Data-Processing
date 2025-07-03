@@ -24,7 +24,7 @@ Violin <- function (MDS, Param, ttl, labelHeight) {
       geom_point(position = position_jitter(seed = 1, width = 0.2)) +
       labs(title = ttl, x = "Sex at birth", y = Param) +
       theme(legend.position = "none") +
-      geom_text(data=labs,aes(x=Sex.at.birth,y=labelHeight,label=i, hjust = -0.7))
+      geom_text(data = labs, aes(x = Sex.at.birth, y = labelHeight, label = i, hjust = -0.7))
     
   return(graph)
   }

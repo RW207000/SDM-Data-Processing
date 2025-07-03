@@ -57,7 +57,6 @@ heightforBA_2022_2024 <- Violin(first_to_second, "HeightSDSforBA", "None", "Heig
 heightforBA_2024_2025 <- Violin(second_to_third, "HeightSDSforBA", "None", "HeightSDS for Bone age (2024-2025)")
 ```
 
-
 ```{r : violin plot - height SDS for chronological age}
 heightforCA <- Violin(all_data, "HeightSDS", "HeightSDS for chronological age (all data)", -4) + ylim(-5,5)
 
@@ -68,36 +67,37 @@ heightforCA_2022_2024 <- Violin(first_to_second, "HeightSDS", "HeightSDS for chr
 heightforCA_2024_2025 <- Violin(second_to_third, "HeightSDS", "HeightSDS for chronological age (2024-2025)", -4) + ylim(-5,5)
 ```
 
+```{r : violin plot - weight SDS}
+weight_all <- Violin(all_data, "WeightSDS", "WeightSDS (all data)", -4) + ylim(-5,7.5)
+
+weight_before_first_collection <- Violin(before_2022, "WeightSDS", "WeightSDS (before first collection)", -4) + ylim(-5,7.5)
+
+weight_2022_2024 <- Violin(first_to_second, "WeightSDS", "WeightSDS (2022-2024)", -4) + ylim(-5,7.5)
+
+weight_2024_2025 <- Violin(second_to_third, "WeightSDS", "WeightSDS (2024-2025)", -4) + ylim(-5,7.5)
+```
+
+```{r : violin plot - BMI SDS}
+BMI_all <- Violin(all_data, "BMISDS", "BMI SDS (all data)", -4) + ylim(-5, 7.5)
+
+BMI_before_first_collection <- Violin(before_2022, "BMISDS", "BMI SDS (before first collection)", -4) + ylim(-5,7.5)
+
+BMI_2022_2024 <- Violin(first_to_second, "BMISDS", "BMI SDS (2022-2024)", -4) + ylim(-5,7.5)
+
+BMI_2024_2025 <- Violin(second_to_third, "BMISDS", "BMI SDS (2024-2025)", -4) + ylim(-5,7.5)
+```
+
+#####
+
+
+```{r : violin plot - 17-OHP}
+OHP_all <- Violin(all_data, "X17.OHP.value", "17-OHP concentrations (all data)", 0.05) + scale_y_continuous(trans = "log10") +
+  geom_hline(yintercept = 30, colour = "red") +
+  annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=36, alpha=.5, fill='grey')
+
+```
 
 ```{r : violin plots}
-BMI_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = BMISDS, fill = Sex.at.birth)) +
-  geom_violin() +
-  theme_classic() +
-  ylim(-5, 7.5) +
-  ggtitle("BMISDS") +
-  geom_point(position = position_jitter(seed = 1, width = 0.2))
-
-# Age_violin <- ggplot(all_data_22_25, aes(x = Sex.at.birth.x, y = Age, fill = Sex.at.birth.x)) +
-#   geom_violin() +
-#   theme_classic() +
-#   scale_y_continuous(breaks = seq(0, 90, by = 5)) +
-#   ggtitle("Age") +
-#   geom_point(position = position_jitter(seed = 1, width = 0.2))
-
-Weight_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = WeightSDS, fill = Sex.at.birth)) +
-  geom_violin() +
-  theme_classic() +
-  ylim(-5,7) +
-  ggtitle("WeightSDS") +
-  geom_point(position = position_jitter(seed = 1, width = 0.2))
-
-Height_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = HeightSDS, fill = Sex.at.birth)) +
-  geom_violin() +
-  theme_classic() +
-  ylim(-5,5) +
-  ggtitle("HeightSDS") +
-  geom_point(position = position_jitter(seed = 1, width = 0.2))
-
 # BP_systolic_violin <- ggplot(all_data_22_25, aes(x = Sex.at.birth.x, y = Systolic.Blood.Pressure, fill = Sex.at.birth.x)) +
 #   geom_violin() +
 #   theme_classic() +
@@ -112,14 +112,7 @@ Height_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = HeightSDS, fill = Se
 #   ggtitle("Diastolic blood pressure (mmHg) 22-25")  +
 #   geom_point(position = position_jitter(seed = 1, width = 0.2))
 
-OHP_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = `X17.OHP.value`, fill = Sex.at.birth)) +
-  geom_violin() +
-  theme_classic() +
-  ggtitle("17OHP concentrations") +
-  geom_point(position = position_jitter(seed = 1, width = 0.2)) +
-  scale_y_continuous(trans = "log10") +
-  geom_hline(yintercept = 30, colour = "red") +
-  annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=36, alpha=.5, fill='grey')
+
 
 andro_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = Androstenedione.value, fill = Sex.at.birth)) +
   geom_violin() +
