@@ -17,7 +17,7 @@ Working notes:
 
 libraries
 ```{r : reading libraries, include= FALSE}
-packages <- c("tidyverse", "readxl", "dplyr", "magrittr", "mixtools", "emmeans", "readr","data.table", "lubridate", "ggplot2", "skimr", "ggstatsplot","summarytools", "knitr", "here", "ggthemes", "Amelia", "tidyr", "naniar", "stringr", "janitor", "ggbreak", "patchwork", "plotrix", "viridis", "hrbrthemes", "showtext")
+packages <- c("tidyverse", "readxl", "dplyr", "magrittr", "mixtools", "emmeans", "readr","data.table", "lubridate", "ggplot2", "skimr", "ggstatsplot","summarytools", "knitr", "here", "ggthemes", "Amelia", "tidyr", "naniar", "stringr", "janitor", "ggbreak", "patchwork", "plotrix", "viridis", "hrbrthemes", "showtext", "plot3D", "plot3Drgl", "GGally", "htmlwidgets", "plotly")
 
 lapply(packages, library, character.only = TRUE)
 ```
@@ -87,16 +87,71 @@ BMI_2022_2024 <- Violin(first_to_second, "BMISDS", "BMI SDS (2022-2024)", -4) + 
 BMI_2024_2025 <- Violin(second_to_third, "BMISDS", "BMI SDS (2024-2025)", -4) + ylim(-5,7.5)
 ```
 
-#####
-
-
 ```{r : violin plot - 17-OHP}
 OHP_all <- Violin(all_data, "X17.OHP.value", "17-OHP concentrations (all data)", 0.05) + scale_y_continuous(trans = "log10") +
   geom_hline(yintercept = 30, colour = "red") +
   annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=36, alpha=.5, fill='grey')
 
+OHP_before_first_collection <- Violin(before_2022, "X17.OHP.value", "17-OHP concentrations (before 2022)", 0.05) + scale_y_continuous(trans = "log10") +
+  geom_hline(yintercept = 30, colour = "red") +
+  annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=36, alpha=.5, fill='grey')
+
+OHP_2022_2024 <- Violin(first_to_second, "X17.OHP.value", "17-OHP concentrations (2022-2024)", 0.05) + scale_y_continuous(trans = "log10") +
+  geom_hline(yintercept = 30, colour = "red") +
+  annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=36, alpha=.5, fill='grey')
+
+OHP_2024_2025 <- Violin(second_to_third, "X17.OHP.value", "17-OHP concentrations (2024-2025)", 0.05) + scale_y_continuous(trans = "log10") +
+  geom_hline(yintercept = 30, colour = "red") +
+  annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=36, alpha=.5, fill='grey')
 ```
 
+```{r : violin plot - androstenedione}
+andro_all <- Violin(all_data, "Androstenedione.value", "Androstenedione concentrations (all data)", 0) +
+  scale_y_break(c(20,30,55,70), scale = 0.25) +
+  scale_y_continuous(breaks = seq(0, 70, by = 2)) +
+  geom_hline(yintercept = 8, colour = "red")
+```
+
+```{r : 3D plots - biomarkers vs GC dose}
+data_biomarkers <- select(all_data, c("Sex.at.birth", "X17.OHP.value", "Androstenedione.value", "Renin.value", "Total.testosterone.value", "HCe.total.daily.dose.per.BSA"))
+
+# check here for anomalously high biomarker values
+# in this case, there's a 17OHP value of 12240 (row 917) which needs to be removed
+# can't work out how to do <710 (next highest legit value) and keep NAs too (without keep NAs, I lose lots of rows)
+# let's just remove this one row manually this time...
+data_biomarkers <- data_biomarkers[-917,]
+
+# make female and male subset dataframes
+female_biomarkers <- data_biomarkers[data_biomarkers$Sex.at.birth == "Female",]
+male_biomarkers <- data_biomarkers[data_biomarkers$Sex.at.birth == "Male",]
+NA_biomarkers <- data_biomarkers[data_biomarkers$Sex.at.birth == "Not Assigned",]
+
+biomarkers_vs_dose_all <- pairs(data_biomarkers[, c(2,3,5,6)], pch = 19, lower.panel = NULL, main = "Biomarkers vs HCe total daily dose per BSA (all data)", na.action = na.omit)
+
+female_biomarkers_vs_dose <- pairs(female_biomarkers[, c(2,3,5,6)], pch= 19, col = "red", lower.panel = NULL, main = "Biomarkers vs HCe total daily dose per BSA (females)")
+
+male_biomarkers_vs_dose <- pairs(male_biomarkers[, c(2,3,5,6)], pch = 19, col = "blue", lower.panel = NULL,  main = "Biomarkers vs HCe total daily dose per BSA (males)")
+
+NA_biomarkers_vs_dose <- pairs(NA_biomarkers[, c(2,3,5,6)], pch = 19, col = "green", lower.panel = NULL, main = "Biomarkers vs HCe total daily dose per BSA (Not Assigned)")
+
+#
+biomarkers_vs_dose <- ggpairs(data_biomarkers[, c(2,3,5,6)], pch = 19)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-----------
 ```{r : violin plots}
 # BP_systolic_violin <- ggplot(all_data_22_25, aes(x = Sex.at.birth.x, y = Systolic.Blood.Pressure, fill = Sex.at.birth.x)) +
 #   geom_violin() +
