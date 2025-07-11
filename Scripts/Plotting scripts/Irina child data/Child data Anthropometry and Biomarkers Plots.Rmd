@@ -85,6 +85,29 @@ BMI_before_first_collection <- Violin(before_2022, "BMISDS", "BMI SDS (before fi
 BMI_2022_2024 <- Violin(first_to_second, "BMISDS", "BMI SDS (2022-2024)", -4) + ylim(-5,7.5)
 
 BMI_2024_2025 <- Violin(second_to_third, "BMISDS", "BMI SDS (2024-2025)", -4) + ylim(-5,7.5)
+
+
+# BMI SDS for patients with low androgen levels - ie.: patients with 17-OHP interpretation of 'low'
+# first make dataframes
+BMI_low_OHP_all <- all_data[!is.na(all_data$X17.OHP.interpretation),]
+BMI_low_OHP_all <- test[test$X17.OHP.interpretation == "Low",]
+
+BMI_low_OHP_df_before_first_collection <- before_2022[!is.na(before_2022$X17.OHP.interpretation),]
+BMI_low_OHP_df_before_first_collection<-BMI_low_OHP_df_before_first_collection[BMI_low_OHP_df_before_first_collection$X17.OHP.interpretation == "Low",]
+
+BMI_low_OHP_df_2022_2024 <- first_to_second[!is.na(first_to_second$X17.OHP.interpretation),]
+BMI_low_OHP_df_2022_2024 <- BMI_low_OHP_df_2022_2024[BMI_low_OHP_df_2022_2024$X17.OHP.interpretation == "Low",]
+
+BMI_low_OHP_df_2024_2025 <- second_to_third[!is.na(second_to_third$X17.OHP.interpretation),]
+BMI_low_OHP_df_2024_2025 <- BMI_low_OHP_df_2024_2025[BMI_low_OHP_df_2024_2025$X17.OHP.interpretation == "Low",]
+
+BMI_all_low_OHP <- Violin(BMI_low_OHP_all, "BMISDS", "BMI SDS with low androgen (all data)", -4) + ylim(-5, 7.5)
+
+BMI_low_OHP_before_first_collection <- Violin(BMI_low_OHP_df_before_first_collection, "BMISDS", "BMI SDS with low androgen (before first collection)", -4) + ylim(-5,7.5)
+
+BMI_low_OHP_2022_2024 <- Violin(BMI_low_OHP_df_2022_2024, "BMISDS", "BMI SDS with low androgen (2022-2024)", -4) + ylim(-5,7.5)
+
+BMI_low_OHP_2024_2025 <- Violin(BMI_low_OHP_df_2024_2025, "BMISDS", "BMI SDS with low androgen (2024-2025)", -4) + ylim(-5,7.5)
 ```
 
 ```{r : violin plot - 17-OHP}
