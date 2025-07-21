@@ -45,6 +45,12 @@ first_to_second <- all_data %>%
 
 second_to_third <- all_data %>%
   filter(Date.of.Assessment > "2024-03-31")
+
+
+# add column to 'all_data' to show which time frame each record is (to use for colour grouping in plots later on)
+all_data$timeframe[all_data$Date.of.Assessment <= "2022-09-30"] <- "before first collection"
+all_data$timeframe[all_data$Date.of.Assessment > "2022-09-30" & all_data$Date.of.Assessment <= "2024-03-31"] <- "2022-2024"
+all_data$timeframe[all_data$Date.of.Assessment > "2024-03-21"] <- "2024-2025"
 ```
 
 ```{r : violin plot - height SDS for BA}
@@ -90,7 +96,6 @@ BMI_2024_2025 <- Violin(second_to_third, "BMISDS", "BMI SDS (2024-2025)", -4) + 
 # BMI SDS for patients with low androgen levels - ie.: patients with 17-OHP interpretation of 'low'
 # first make dataframes
 BMI_low_OHP_all <- all_data[!is.na(all_data$X17.OHP.interpretation),]
-BMI_low_OHP_all <- test[test$X17.OHP.interpretation == "Low",]
 
 BMI_low_OHP_df_before_first_collection <- before_2022[!is.na(before_2022$X17.OHP.interpretation),]
 BMI_low_OHP_df_before_first_collection<-BMI_low_OHP_df_before_first_collection[BMI_low_OHP_df_before_first_collection$X17.OHP.interpretation == "Low",]
@@ -108,6 +113,18 @@ BMI_low_OHP_before_first_collection <- Violin(BMI_low_OHP_df_before_first_collec
 BMI_low_OHP_2022_2024 <- Violin(BMI_low_OHP_df_2022_2024, "BMISDS", "BMI SDS with low androgen (2022-2024)", -4) + ylim(-5,7.5)
 
 BMI_low_OHP_2024_2025 <- Violin(BMI_low_OHP_df_2024_2025, "BMISDS", "BMI SDS with low androgen (2024-2025)", -4) + ylim(-5,7.5)
+
+#
+BMI_test <- ggplot(all_data, aes(x = Sex.at.birth, y = BMISDS)) +
+  geom_boxplot() +
+  ggtitle("BMI SDS (all data)") +
+  ylim(-5, 7.5) +
+  theme_minimal() +
+  geom_point(position = position_dodge(width = 0), aes(shape = timeframe, color = timeframe)) +
+  scale_shape_manual(values=c(19, 19, 19)) +
+  scale_color_manual(values = c("green", "dodgerblue", "red")) +
+  annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=15, alpha=.5, fill='grey') + geom_hline(yintercept = 11, colour = "red")
+#
 ```
 
 ```{r : violin plot - 17-OHP}
@@ -128,9 +145,91 @@ OHP_2024_2025 <- Violin(second_to_third, "X17.OHP.value", "17-OHP concentrations
   annotate('rect', xmin=-Inf, xmax=Inf, ymin=10, ymax=36, alpha=.5, fill='grey')
 ```
 
+```{r : violin plot - renin plasma activity}
+renin_all <- Violin(all_data, "Renin.plasma.activity", "Renin plasma activity (all data)", 45) +
+  scale_y_break(c(60,100), scale = 0.25)
+
+renin_before_first_collection <- Violin(before_2022, "Renin.plasma.activity", "Renin plasma activity (before 2022)", 50) +
+  scale_y_break(c(60,100), scale = 0.25)
+
+renin_2022_2024 <- Violin(first_to_second, "Renin.plasma.activity", "Renin plasma activity (2022-2024)", 50)
+
+renin_2024_2025 <- Violin(second_to_third, "Renin.plasma.activity", "Renin plasma activity (2024-2025)", 50) +
+  scale_y_break(c(100, 400), scale = 0.25)
+```
+
+```{r : violin plot - testosterone}
+# need to split into age groupings for males (<12 years old and >)
+# can't work out how to streamline this bit, so I have got two plots per timeframe - one without age categories (to use for female and NA) and one with age categories (to use for males)
+# will need to do powerpoint manipulation to get final plots
+# only males need to be split by age category
+
+testo_all <- Violin(all_data, "Total.testosterone.value", "Total testosterone (all data)", 10)
+
+testosterone_all_2 <- ggplot(all_data, aes(x = Sex.at.birth, y = `Total.testosterone.value`, fill = Age.category)) +
+  geom_violin() +
+  theme_classic() +
+  ggtitle("Total testosterone (all data)") +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  scale_fill_manual(values = myColours) +
+  geom_point(position = position_dodge(width = 1),
+                 aes(group = Age.category))
+
+testo_before_first_collection <- Violin(before_2022, "Total.testosterone.value", "Total testosterone (before 2022)", 10)
+
+testosterone_before_first_collection_2 <- ggplot(before_2022, aes(x = Sex.at.birth, y = `Total.testosterone.value`, fill = Age.category)) +
+  geom_violin() +
+  theme_classic() +
+  ggtitle("Total testosterone (before 2022)") +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  scale_fill_manual(values = myColours) +
+  geom_point(position = position_dodge(width = 1),
+                 aes(group = Age.category))
+
+testo_2022_2024 <- Violin(first_to_second, "Total.testosterone.value", "Total testosterone (2022-2024)", 10)
+
+testosterone_2022_2024_2 <- ggplot(first_to_second, aes(x = Sex.at.birth, y = `Total.testosterone.value`, fill = Age.category)) +
+  geom_violin() +
+  theme_classic() +
+  ggtitle("Total testosterone (2022-2024)") +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  scale_fill_manual(values = myColours) +
+  geom_point(position = position_dodge(width = 1),
+                 aes(group = Age.category))
+
+testo_2024_2025 <- Violin(second_to_third, "Total.testosterone.value", "Total testosterone (2024-2025)", 10)
+
+testosterone_2024_2025_2 <- ggplot(second_to_third, aes(x = Sex.at.birth, y = `Total.testosterone.value`, fill = Age.category)) +
+  geom_violin() +
+  theme_classic() +
+  ggtitle("Total testosterone (2024-2025)") +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  scale_fill_manual(values = myColours) +
+  geom_point(position = position_dodge(width = 1),
+                 aes(group = Age.category))
+```
+
+  geom_point(position = position_dodge(width = 1),
+                 aes(group = Age.category))
+                 
+
 ```{r : violin plot - androstenedione}
-andro_all <- Violin(all_data, "Androstenedione.value", "Androstenedione concentrations (all data)", 0) +
+andro_all <- Violin(all_data, "Androstenedione.value", "Androstenedione concentrations (all data)", 20) +
   scale_y_break(c(20,30,55,70), scale = 0.25) +
+  scale_y_continuous(breaks = seq(0, 70, by = 2)) +
+  geom_hline(yintercept = 8, colour = "red")
+
+andro_before_first_collection <- Violin(before_2022, "Androstenedione.value", "Androstenedione concentrations (before 2022)", 20) +
+  scale_y_break(c(20,30,55,70), scale = 0.25) +
+  scale_y_continuous(breaks = seq(0, 70, by = 2)) +
+  geom_hline(yintercept = 8, colour = "red")
+
+andro_2022_2024 <- Violin(first_to_second, "Androstenedione.value", "Androstenedione concentrations (2022-2024))", 20) +
+  scale_y_break(c(28,35), scale = 0.25) +
+  scale_y_continuous(breaks = seq(0, 70, by = 2)) +
+  geom_hline(yintercept = 8, colour = "red")
+
+andro_2024_2025 <- Violin(second_to_third, "Androstenedione.value", "Androstenedione concentrations (2024-2025)", 20) +
   scale_y_continuous(breaks = seq(0, 70, by = 2)) +
   geom_hline(yintercept = 8, colour = "red")
 ```
@@ -163,35 +262,8 @@ biomarkers_vs_dose <- ggpairs(data_biomarkers[, c(2,3,5,6)], pch = 19)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 -----------
 ```{r : violin plots}
-# BP_systolic_violin <- ggplot(all_data_22_25, aes(x = Sex.at.birth.x, y = Systolic.Blood.Pressure, fill = Sex.at.birth.x)) +
-#   geom_violin() +
-#   theme_classic() +
-#   scale_y_continuous(breaks = seq(80, 180, by = 10)) +
-#   ggtitle("Systolic blood pressure (mmHg) 22-25") +
-#   geom_point(position = position_jitter(seed = 1, width = 0.2))
-# 
-# BP_diastolic_violin <- ggplot(all_data_22_25, aes(x = Sex.at.birth.x, y = Diastolic.Blood.Pressure, fill = Sex.at.birth.x)) +
-#   geom_violin() +
-#   theme_classic() +
-#   scale_y_continuous(breaks = seq(45, 110, by = 10)) +
-#   ggtitle("Diastolic blood pressure (mmHg) 22-25")  +
-#   geom_point(position = position_jitter(seed = 1, width = 0.2))
-
-
-
 andro_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = Androstenedione.value, fill = Sex.at.birth)) +
   geom_violin() +
   theme_classic() +
@@ -241,23 +313,23 @@ renin_violin <- ggplot(all_data, aes(x = Sex.at.birth, y = Renin.plasma.activity
 
 ```
 
-```{r : biomarker plots}
+```{r : biomarker box plots}
 # have played around with various axis breaks and y scales to get data to look as clear as possible...
 ## testosterone
-testosterone_all <- MDBoxPlot(all_data, "Total.testosterone.value", "Sex only", "Testosterone") +
+testosterone_all <- MDBoxPlot(all_data, "Total.testosterone.value", "Sex only", "Testosterone (all data)") +
   scale_y_continuous(breaks = seq(0, 30, by = 2.5))
 
 # introduce age category
 # only need age category for males so will need to do some powerpoint cropping
-    testosterone_all2 <- ggplot(all_data, aes(x = Sex.at.birth, y = Total.testosterone.value, fill = Age.category, col = Sex.at.birth)) +
-      geom_boxplot(position = position_dodge2(preserve='single'),) +
-      scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
-      labs(title = "Testosterone", x = "Centre ID", y = "Total.testosterone.value") +
-      theme_classic() +
-      theme() +
-      scale_fill_manual(values = myColours) +
-      geom_point(position = position_dodge(width = 0.75),
-                 aes(group = Age.category))
+testosterone_all2 <- ggplot(all_data, aes(x = Sex.at.birth, y = Total.testosterone.value, fill = Age.category, col = Sex.at.birth)) +
+  geom_boxplot(position = position_dodge2(preserve='single'),) +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  labs(title = "Total testosterone (all data)", x = "Centre ID", y = "Total.testosterone.value") +
+  theme_classic() +
+  theme() +
+  scale_fill_manual(values = myColours) +
+  geom_point(position = position_dodge(width = 0.75),
+             aes(group = Age.category))
 #
 
 ## renin plasma activity
